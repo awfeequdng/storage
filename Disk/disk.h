@@ -286,6 +286,7 @@ private:
     static CHAR *ConvertSENDCMDOUTPARAMSBufferToString(const DWORD *dwDiskData, DWORD nFirstIndex, DWORD nLastIndex);
 
 private:
+    HWND     m_hWnd;
     CUtils   m_utils;
     CIni     m_ini;
     CPort    *m_MasterPort;

@@ -7,8 +7,8 @@
 
 #include "common/cstring.h"
 #include <vector>
-
-
+//#include <ctime>
+#include <chrono>
 
 class CPort
 {
@@ -48,7 +48,7 @@ private:
 //	// 起止时间
 //	CTime m_StartTime;
 //	CTime m_EndTime;
-
+//    std::chrono::system_clock::now();
 	// 计算
 	volatile ULONGLONG m_ullValidSize;
 	volatile ULONGLONG m_ullCompleteSize;

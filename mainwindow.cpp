@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "config.h"
-
+#include "Disk/makeimagedisk.h"
 extern GcfgMainWindow *g_pGcfgMainWindow;
 
 
@@ -109,7 +109,17 @@ void MainWindow::on_btnLockScreen_clicked()
 
 void MainWindow::on_btnStart_clicked()
 {
-
+    switch(g_pGcfgMainWindow->selectPattern())
+    {
+    case CREATE_IMAGE:
+    {
+        std::thread mkImageThd(makeImageThread);
+        mkImageThd.detach();
+        break;
+    }
+    default:
+        break;
+    }
 }
 
 void MainWindow::on_btnGiveUp_clicked()
@@ -119,7 +129,7 @@ void MainWindow::on_btnGiveUp_clicked()
 
 void MainWindow::initial()
 {
-    m_nPortNum = 18;
+    m_nPortNum = 6;
     m_bLock = TRUE;
     m_bCancel = FALSE;
     m_bResult = TRUE;
@@ -407,6 +417,12 @@ void MainWindow::release()
     delete ui;
 }
 
+void MainWindow::makeImageThread()
+{
+    MakeImageDisk makeDiskImage;
+    makeDiskImage.make();
+}
+
 void MainWindow::InitialPortFrame()
 {
 
@@ -463,6 +479,21 @@ BOOL MainWindow::SyncTime()
 }
 
 void MainWindow::EnableControls(BOOL bEnable)
+{
+
+}
+
+BOOL MainWindow::IsReady()
+{
+    return TRUE;
+}
+
+void MainWindow::OnStart()
+{
+
+}
+
+DWORD MainWindow::StartThreadProc(LPVOID lpParm)
 {
 
 }

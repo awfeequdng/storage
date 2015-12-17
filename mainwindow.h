@@ -35,6 +35,7 @@
 #include "SerialPortCommand/PortCommand.h"
 
 #include "Disk/Port.h"
+#include "Disk/disk.h"
 
 #define MAX_RUN_TIMES  500
 
@@ -78,6 +79,7 @@ private:
     void initialConfig();
     void release();
 
+    static void makeImageThread();
 
 private:
     Ui::MainWindow *ui;

@@ -32,6 +32,26 @@ BOOL Disk::SetDiskAtrribute(HANDLE hDisk, BOOL bReadOnly, BOOL bOffline, PDWORD 
 
 }
 
+void Disk::Init(HWND hWnd, LPBOOL lpCancel, HANDLE hLogFile, PortCommand *pCommand, UINT nBlockSectors)
+{
+    m_hWnd = hWnd;
+    m_lpCancel = lpCancel;
+    m_hLogFile = hLogFile;
+    m_pCommand = pCommand;
+    m_nBlockSectors = nBlockSectors;
+}
+
+
+void Disk::SetWorkMode(WorkMode workMode)
+{
+    m_WorkMode = workMode;
+}
+
+void Disk::SetGlobalParm(BOOL bMustSameCapacity)
+{
+
+}
+
 BOOL Disk::ReadSectors(HANDLE hDevice, ULONGLONG ullStartSector, DWORD dwSectors, DWORD dwBytesPerSector, LPBYTE lpSectBuff, LPOVERLAPPED lpOverlap, DWORD *pdwErrorCode, DWORD dwTimeOut)
 {
 
@@ -178,12 +198,46 @@ BOOL Disk::WriteFile(HANDLE hDevice, LPBYTE lpSectBuff, DWORD dwLen, DWORD &dwWr
 
 BOOL Disk::ReadFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYTE lpBuffer, PDWORD pdwErrorCode, DWORD dwTimeOut)
 {
-
+    int n;
+    if((n = pread(hFile,lpBuffer,dwSize,ullOffset))>0)
+    {
+        dwSize = n;
+        return TRUE;
+    }
+    else
+    {
+       if(n<0)
+       {
+            return FALSE;
+       }
+       else
+       {
+            dwSize = n;
+            return TRUE;
+       }
+    }
 }
 
 BOOL Disk::WriteFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYTE lpBuffer, PDWORD pdwErrorCode, DWORD dwTimeOut)
 {
-
+    long n;
+    if((n = pwrite(hFile,lpBuffer,dwSize,ullOffset))>0)
+    {
+        dwSize = n;
+        return TRUE;
+    }
+    else
+    {
+       if(n<0)
+       {
+            return FALSE;
+       }
+       else
+       {
+            dwSize = n;
+            return TRUE;
+       }
+    }
 }
 
 BootSector Disk::GetBootSectorType(const PBYTE pXBR)

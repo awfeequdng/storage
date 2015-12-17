@@ -13,8 +13,8 @@ TEMPLATE = app
 
 CONFIG += c++11
 
-LIBS +=-L/usr/local/lib/
-#LIBS +=/usr/local/lib/libz.a
+#LIBS +=-L/usr/local/lib/
+LIBS +=/usr/local/lib/libz.a
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -61,7 +61,8 @@ SOURCES += main.cpp\
     UI/systemfuncdlg.cpp \
     UI/userdefineitemdlg.cpp \
     UI/varisizedupitemdlg.cpp \
-    UI/viewimagedlg.cpp
+    UI/viewimagedlg.cpp \
+    Disk/makeimagedisk.cpp
 
 HEADERS  += mainwindow.h \
     SerialPortCommand/PortCommand.h \
@@ -109,7 +110,8 @@ HEADERS  += mainwindow.h \
     UI/userdefineitemdlg.h \
     UI/varisizedupitemdlg.h \
     UI/viewimagedlg.h \
-    config.h
+    config.h \
+    Disk/makeimagedisk.h
 
 FORMS    += mainwindow.ui \
     UI/capconvertdupitemdlg.ui \
