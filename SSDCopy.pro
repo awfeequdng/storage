@@ -13,6 +13,9 @@ TEMPLATE = app
 
 CONFIG += c++11
 
+LIBS +=-L/usr/local/lib/
+#LIBS +=/usr/local/lib/libz.a
+
 SOURCES += main.cpp\
         mainwindow.cpp \
     SerialPortCommand/PortCommand.cpp \

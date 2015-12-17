@@ -18,7 +18,7 @@ typedef long                LONG;
 typedef unsigned long       ULONG;
 typedef signed int          DWORD;
 typedef int                 BOOL;
-typedef char                BYTE;
+typedef unsigned char                BYTE;
 typedef BYTE *              PBYTE;
 typedef PBYTE               LPBYTE;
 typedef unsigned short      WORD;
@@ -37,7 +37,7 @@ typedef int                 HANDLE;
 typedef QWidget *           HWND;
 typedef QWidget             CWnd;
 
-typedef char * TCHAR;
+typedef char  TCHAR;
 typedef void * MEDIA_TYPE;
 typedef int  SOCKET;
 

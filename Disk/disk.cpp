@@ -1,7 +1,33 @@
 #include "disk.h"
 #include <string.h>
+#include <zlib.h>
 
 Disk::Disk()
+{
+
+}
+
+HANDLE Disk::GetHandleOnPhysicalDrive(Disk::DISK_INDEX iDiskNumber, DWORD dwFlagsAndAttributes, PDWORD pdwErrorCode)
+{
+
+}
+
+HANDLE Disk::GetHandleOnVolume(TCHAR letter, DWORD dwFlagsAndAttributes, PDWORD pdwErrorCode)
+{
+
+}
+
+HANDLE Disk::GetHandleOnFile(LPCTSTR lpszFileName, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, PDWORD pdwErrorCode)
+{
+
+}
+
+ULONGLONG Disk::GetNumberOfSectors(HANDLE hDevice, PDWORD pdwBytesPerSector, MEDIA_TYPE *type)
+{
+
+}
+
+BOOL Disk::SetDiskAtrribute(HANDLE hDisk, BOOL bReadOnly, BOOL bOffline, PDWORD pdwErrorCode)
 {
 
 }
@@ -246,8 +272,7 @@ BOOL Disk::IsAllFailed(ErrorType &errType, PDWORD pdwErrorCode)
 
 void Disk::AddDataQueueList(PDATA_INFO dataInfo)
 {
-    POSITION pos1 = m_DataQueueList.GetHeadPosition();
-    POSITION pos2 = m_TargetPorts->GetHeadPosition();
+
     CDataQueueList::const_iterator it1 = m_DataQueueList.begin();
     CDataQueueList::const_iterator it1_end = m_DataQueueList.end();
     PortList::const_iterator it2 = m_TargetPorts->begin();
@@ -375,7 +400,7 @@ BOOL Disk::QuickClean(HANDLE hDisk, CPort *port, PDWORD pdwErrorCode)
         bResult = FALSE;
     }
 
-    if (!WriteSectors(hDisk,ullSectorNums-dwSectors,dwSectors,dwBytesPerSector,pByte,port->GetOverlapped(FALSE),pdwErrorCode))
+    if (!WriteSectors(hDisk,ullSectorNums-dwSectors,dwSectors,dwBytesPerSector,pByte,pdwErrorCode))
     {
         bResult = FALSE;
     }
@@ -651,11 +676,10 @@ BOOL Disk::ReadDisk()
 
             ZeroMemory(pByte,dwLen);
 
-            QueryPerformanceCounter(&t1);
-            if (!ReadSectors(m_hMaster,ullStartSectors,dwSectors,effData.wBytesPerSector,pByte,m_MasterPort->GetOverlapped(TRUE),&dwErrorCode))
+//            QueryPerformanceCounter(&t1);
+            if (!ReadSectors(m_hMaster,ullStartSectors,dwSectors,effData.wBytesPerSector,pByte,&dwErrorCode))
             {
                 bResult = FALSE;
-
 
 //                CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Port %s,Disk %d,Speed=%.2f,system errorcode=%ld,%s")
 //                    ,m_MasterPort->GetPortName(),m_MasterPort->GetDiskNum(),m_MasterPort->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
@@ -771,7 +795,7 @@ BOOL Disk::ReadDisk()
     }
 
     m_MasterPort->SetResult(bResult);
-    m_MasterPort->SetEndTime(CTime::GetCurrentTime());
+//    m_MasterPort->SetEndTime(CTime::GetCurrentTime());
 
     if (bResult)
     {
@@ -866,7 +890,6 @@ BOOL Disk::WriteDisk(CPort *port, CDataQueue *pDataQueue)
     else
     {
         //有效资料的最大扇区有没有超过子盘容量
-        POSITION pos = m_EffList.GetHeadPosition();
         EFF_LIST::const_iterator it = m_EffList.begin();
         EFF_LIST::const_iterator it_end = m_EffList.end();
 
@@ -923,7 +946,7 @@ BOOL Disk::WriteDisk(CPort *port, CDataQueue *pDataQueue)
 
     while (!*m_lpCancel && m_MasterPort->GetResult() && port->GetResult() && bResult && !port->IsKickOff())
     {
-        QueryPerformanceCounter(&t0);
+//        QueryPerformanceCounter(&t0);
 
 
         while(pDataQueue->GetCount() <= 0 && !*m_lpCancel && m_MasterPort->GetResult()
@@ -1005,46 +1028,27 @@ BOOL Disk::WriteDisk(CPort *port, CDataQueue *pDataQueue)
         ULONGLONG ullStartSectors = dataInfo->ullOffset / dwBytesPerSector;
         DWORD dwSectors = dataInfo->dwDataSize / dwBytesPerSector;
 
-        // 打印一个扇区
-// 		if (bWriteLog)
-// 		{
-// 			CString strSector,strByte;
-// 			CUtils::WriteLogFile(m_hLogFile,FALSE,_T("Port %s - Sector %d"),port->GetPortName(),ullStartSectors);
-// 			for (int i = 0; i < 512;i++)
-// 			{
-// 				strByte.Format(_T("%02X "),dataInfo->pData[i]);
-// 				strSector += strByte;
-//
-// 				if ((i+1) % 16 == 0 )
-// 				{
-// 					CUtils::WriteLogFile(m_hLogFile,FALSE,strSector);
-// 					strSector.Empty();
-// 				}
-//
-// 			}
-//
-// 			bWriteLog = FALSE;
-// 		}
 
-        QueryPerformanceCounter(&t1);
-        if (!WriteSectors(hDisk,ullStartSectors,dwSectors,dwBytesPerSector,dataInfo->pData,port->GetOverlapped(FALSE),&dwErrorCode))
+
+//        QueryPerformanceCounter(&t1);
+        if (!WriteSectors(hDisk,ullStartSectors,dwSectors,dwBytesPerSector,dataInfo->pData,&dwErrorCode))
         {
             bResult = FALSE;
 
             delete []dataInfo->pData;
             delete dataInfo;
 
-            CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Port %s,Disk %d,Speed=%.2f,system errorcode=%ld,%s")
-                ,port->GetPortName(),port->GetDiskNum(),port->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
+//            CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Port %s,Disk %d,Speed=%.2f,system errorcode=%ld,%s")
+//                ,port->GetPortName(),port->GetDiskNum(),port->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
             break;
         }
         else
         {
-            QueryPerformanceCounter(&t2);
+//            QueryPerformanceCounter(&t2);
 
-            dbTimeWait = (double)(t2.QuadPart - t0.QuadPart) / (double)freq.QuadPart;
+//            dbTimeWait = (double)(t2.QuadPart - t0.QuadPart) / (double)freq.QuadPart;
 
-            dbTimeNoWait = (double)(t2.QuadPart - t1.QuadPart) / (double)freq.QuadPart;
+//            dbTimeNoWait = (double)(t2.QuadPart - t1.QuadPart) / (double)freq.QuadPart;
 
             port->AppendUsedWaitTimeS(dbTimeWait);
             port->AppendUsedNoWaitTimeS(dbTimeNoWait);
@@ -1063,7 +1067,7 @@ BOOL Disk::WriteDisk(CPort *port, CDataQueue *pDataQueue)
 
     }
 
-    CloseHandle(hDisk);
+//    CloseHandle(hDisk);
 
     if (*m_lpCancel)
     {
@@ -1071,8 +1075,8 @@ BOOL Disk::WriteDisk(CPort *port, CDataQueue *pDataQueue)
         dwErrorCode = CustomError_Cancel;
         errType = ErrorType_Custom;
 
-        CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Port=%s,Disk %d,Speed=%.2f,custom errorcode=0x%X,user cancelled.")
-            ,port->GetPortName(),port->GetDiskNum(),port->GetRealSpeed(),dwErrorCode);
+//        CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Port=%s,Disk %d,Speed=%.2f,custom errorcode=0x%X,user cancelled.")
+//            ,port->GetPortName(),port->GetDiskNum(),port->GetRealSpeed(),dwErrorCode);
     }
 
     if (port->IsKickOff())
@@ -1081,8 +1085,8 @@ BOOL Disk::WriteDisk(CPort *port, CDataQueue *pDataQueue)
         dwErrorCode = CustomError_Speed_Too_Slow;
         errType = ErrorType_Custom;
 
-        CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Port %s,Disk %d,Speed=%.2f,custom errorcode=0x%X,speed too slow.")
-            ,port->GetPortName(),port->GetDiskNum(),port->GetRealSpeed(),CustomError_Speed_Too_Slow);
+//        CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Port %s,Disk %d,Speed=%.2f,custom errorcode=0x%X,speed too slow.")
+//            ,port->GetPortName(),port->GetDiskNum(),port->GetRealSpeed(),CustomError_Speed_Too_Slow);
     }
 
     if (!m_MasterPort->GetResult())
@@ -1099,7 +1103,7 @@ BOOL Disk::WriteDisk(CPort *port, CDataQueue *pDataQueue)
 
 
     port->SetResult(bResult);
-    port->SetEndTime(CTime::GetCurrentTime());
+//    port->SetEndTime(CTime::GetCurrentTime());
 
     if (bResult)
     {
@@ -1172,7 +1176,6 @@ BOOL Disk::Compress()
             && m_MasterPort->GetResult()
             && m_MasterPort->GetPortState() == PortState_Active)
         {
-            //SwitchToThread();
             Sleep(5);
         }
 
@@ -1195,7 +1198,7 @@ BOOL Disk::Compress()
             continue;
         }
 
-        DWORD dwSourceLen = sizeof(ULONGLONG) + sizeof(DWORD) + dataInfo->dwDataSize;
+        ULONG dwSourceLen = sizeof(ULONGLONG) + sizeof(DWORD) + dataInfo->dwDataSize;
         BYTE *pBuffer = new BYTE[dwSourceLen];
         ZeroMemory(pBuffer,dwSourceLen);
         memcpy(pBuffer,&dataInfo->ullOffset,sizeof(ULONGLONG));
@@ -1204,7 +1207,7 @@ BOOL Disk::Compress()
 
         delete []dataInfo->pData;
 
-        DWORD dwDestLen = MAX_COMPRESS_BUF;
+        ULONG dwDestLen = MAX_COMPRESS_BUF;
         BYTE *pDest = new BYTE[MAX_COMPRESS_BUF];
         ZeroMemory(pDest,MAX_COMPRESS_BUF);
 
@@ -1336,7 +1339,7 @@ BOOL Disk::Uncompress()
             continue;
         }
 
-        DWORD dwDestLen = MAX_COMPRESS_BUF;
+        ULONG dwDestLen = MAX_COMPRESS_BUF;
         BYTE *pDest = new BYTE[MAX_COMPRESS_BUF];
         ZeroMemory(pDest,MAX_COMPRESS_BUF);
 
@@ -1363,7 +1366,7 @@ BOOL Disk::Uncompress()
             effData.ullStartSector = uncompressData->ullOffset/BYTES_PER_SECTOR;
             effData.ullSectors = uncompressData->dwDataSize/BYTES_PER_SECTOR;
             effData.wBytesPerSector = BYTES_PER_SECTOR;
-            m_EffList.AddTail(effData);
+            m_EffList.push_back(effData);
 
             if (m_bComputeHash)
             {
@@ -1496,7 +1499,7 @@ BOOL Disk::WriteLocalImage(CPort *port, CDataQueue *pDataQueue)
 
     port->Active();
 
-    HANDLE hFile = GetHandleOnFile(port->GetFileName(),CREATE_ALWAYS,FILE_FLAG_OVERLAPPED,&dwErrorCode);
+    HANDLE hFile /*= GetHandleOnFile(port->GetFileName(),CREATE_ALWAYS,FILE_FLAG_OVERLAPPED,&dwErrorCode)*/;
 
     if (hFile < 0)
     {
@@ -1573,7 +1576,7 @@ BOOL Disk::WriteLocalImage(CPort *port, CDataQueue *pDataQueue)
 
         dwLen = dataInfo->dwDataSize;
 
-        if (!WriteFileAsyn(hFile,ullOffset,dwLen,dataInfo->pData,port->GetOverlapped(FALSE),&dwErrorCode))
+        if (!WriteFileAsyn(hFile,ullOffset,dwLen,dataInfo->pData,&dwErrorCode))
         {
             bResult = FALSE;
 
@@ -1628,14 +1631,14 @@ BOOL Disk::WriteLocalImage(CPort *port, CDataQueue *pDataQueue)
     // 写IMAGE头
     if (bResult)
     {
-        LARGE_INTEGER liSize = {0};
-        GetFileSizeEx(hFile,&liSize);
+        ULONGLONG ullSize = 0;
+//        GetFileSizeEx(hFile,&liSize);
         // 随机生成一个数作为IMAGEID
 
         IMAGE_HEADER imgHead;
         ZeroMemory(&imgHead,sizeof(IMAGE_HEADER));
         memcpy(imgHead.szImageFlag,IMAGE_FLAG,strlen(IMAGE_FLAG));
-        imgHead.ullImageSize = liSize.QuadPart;
+        imgHead.ullImageSize = ullSize;
         memcpy(imgHead.szAppVersion,APP_VERSION,strlen(APP_VERSION));
 
         if (m_nImageType)
@@ -1661,7 +1664,7 @@ BOOL Disk::WriteLocalImage(CPort *port, CDataQueue *pDataQueue)
 
         dwLen = SIZEOF_IMAGE_HEADER;
 
-        if (!WriteFileAsyn(hFile,0,dwLen,(LPBYTE)&imgHead,port->GetOverlapped(FALSE),&dwErrorCode))
+        if (!WriteFileAsyn(hFile,0,dwLen,(LPBYTE)&imgHead,&dwErrorCode))
         {
             bResult = FALSE;
 
@@ -1670,7 +1673,7 @@ BOOL Disk::WriteLocalImage(CPort *port, CDataQueue *pDataQueue)
         }
     }
 
-    CloseHandle(hFile);
+//    CloseHandle(hFile);
 
     port->SetResult(bResult);
 //    port->SetEndTime(CTime::GetCurrentTime());

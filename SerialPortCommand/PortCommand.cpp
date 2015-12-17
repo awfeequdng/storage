@@ -122,7 +122,7 @@ void PortCommand::AllPass()
     BYTE buffer[2]= {0};
 	memcpy(buffer,&wCommand,2);
 
-    m_pSerialPort->write(buffer,2);
+    m_pSerialPort->write((const char *)buffer,2);
 //	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
     //	Sleep(SLEEP_TIME);
 }
@@ -138,7 +138,7 @@ void PortCommand::PassOn(unsigned char nPort)
 
     memcpy(buffer,&wCommand,2);
 
-    m_pSerialPort->write(buffer,2);
+    m_pSerialPort->write((const char *)buffer,2);
 }
 
 void PortCommand::PassOff(unsigned char nPort)
@@ -152,7 +152,7 @@ void PortCommand::PassOff(unsigned char nPort)
 
     memcpy(buffer,&wCommand,2);
 
-    m_pSerialPort->write(buffer,2);
+    m_pSerialPort->write((const char *)buffer,2);
 }
 
 void PortCommand::AllFail()
@@ -162,7 +162,7 @@ void PortCommand::AllFail()
     BYTE buffer[2]= {0};
 	memcpy(buffer,&wCommand,2);
 
-    m_pSerialPort->write(buffer,2);
+    m_pSerialPort->write((const char *)buffer,2);
 //	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
     //	Sleep(SLEEP_TIME);
 }
@@ -178,7 +178,7 @@ void PortCommand::FailOn(unsigned char nPort)
 
     memcpy(buffer,&wCommand,2);
 
-    m_pSerialPort->write(buffer,2);
+    m_pSerialPort->write((const char *)buffer,2);
 }
 
 void PortCommand::FailOff(unsigned char nPort)
@@ -192,7 +192,7 @@ void PortCommand::FailOff(unsigned char nPort)
 
     memcpy(buffer,&wCommand,2);
 
-    m_pSerialPort->write(buffer,2);
+    m_pSerialPort->write((const char *)buffer,2);
 }
 
 void PortCommand::ResetPower()
@@ -202,7 +202,7 @@ void PortCommand::ResetPower()
     BYTE buffer[2]= {0};
 	memcpy(buffer,&wCommand,2);
 
-    m_pSerialPort->write(buffer,2);
+    m_pSerialPort->write((const char *)buffer,2);
 //	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
 //	Sleep(SLEEP_TIME);
 }
@@ -227,7 +227,7 @@ void PortCommand::Buzzer( BOOL bOn )
     BYTE buffer[2]= {0};
 	memcpy(buffer,&wCommand,2);
 
-    m_pSerialPort->write(buffer,2);
+    m_pSerialPort->write((const char *)buffer,2);
 //	CUtils::WrieLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
 //	Sleep(SLEEP_TIME);
 }
@@ -239,7 +239,7 @@ void PortCommand::SwitchScreenToHost()
     BYTE buffer[2]= {0};
 	memcpy(buffer,&wCommand,2);
 
-    m_pSerialPort->write(buffer,2);
+    m_pSerialPort->write((const char *)buffer,2);
 //	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
 //	Sleep(SLEEP_TIME);
 }
@@ -251,7 +251,7 @@ void PortCommand::SwitchScreenToUserDefined()
     BYTE buffer[2]= {0};
     memcpy(buffer,&wCommand,2);
 
-    m_pSerialPort->write(buffer,2);
+    m_pSerialPort->write((const char *)buffer,2);
 //	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
 //	Sleep(SLEEP_TIME);
 }
@@ -274,7 +274,7 @@ void PortCommand::Power( int nPort,BOOL bOn )
     BYTE buffer[2]= {0};
 	memcpy(buffer,&wCommand,2);
 
-    m_pSerialPort->write(buffer,2);
+    m_pSerialPort->write((const char *)buffer,2);
 //	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
 //	Sleep(SLEEP_TIME);
 }
