@@ -28,9 +28,34 @@ MainWindow::~MainWindow()
 
 void MainWindow::slotGlobalParamSettingChange()
 {
-    QString strList[]={tr("快速拷贝"),tr("全盘拷贝"),tr("容量转换拷贝"),
-                      tr("自定义拷贝"),tr("制作映像"),tr("从映像拷贝"),tr("清除磁盘")};
-    ui->btnCurOperate->setText(strList[g_pGcfgMainWindow->selectPattern()]);
+    QString str;
+    switch(g_pGcfgMainWindow->workMode())
+    {
+    case WorkMode_QuickCopy:
+        str = tr("快速拷贝");
+        break;
+    case WorkMode_FullCopy:
+        str = tr("全盘拷贝");
+        break;
+    case WorkMode_DifferenceCopy:
+        str = tr("容量转换拷贝");
+        break;
+    case WorkMode_UserDefine:
+        str = tr("自定义拷贝");
+        break;
+    case WorkMode_ImageMake:
+        str = tr("制作映像");
+        break;
+    case WorkMode_ImageCopy:
+        str = tr("从映像拷贝");
+        break;
+    case WorkMode_DiskClean:
+        str = tr("清除磁盘");
+        break;
+    default:
+        break;
+    }
+    ui->btnCurOperate->setText(str);
 }
 
 void MainWindow::on_btnSystemFunc_clicked()
@@ -47,51 +72,50 @@ void MainWindow::on_btnCurOperate_clicked()
     SelectCurPatternDlg selectCurPattern;
     selectCurPattern.exec();
     slotGlobalParamSettingChange();
-
 }
 
 void MainWindow::on_btnParamSetting_clicked()
 {
-    switch(g_pGcfgMainWindow->selectPattern())
+    switch(g_pGcfgMainWindow->workMode())
     {
-    case QUICK_DUP:
+    case WorkMode_QuickCopy :
     {
         VariSizeDupItemDlg variSizeDup;
         variSizeDup.exec();
         break;
     }
-    case GLOBAL_DUP:
+    case WorkMode_FullCopy/*GLOBAL_DUP*/:
     {
         GlobalDupItemDlg globalDup;
         globalDup.exec();
         break;
     }
-    case CAP_CONVERT_DUP:
+    case WorkMode_DifferenceCopy/*CAP_CONVERT_DUP*/:
     {
         CapConvertDupItemDlg capConvertDup;
         capConvertDup.exec();
 
         break;
     }
-    case USER_DEFINE_DUP:
+    case WorkMode_UserDefine/*USER_DEFINE_DUP*/:
     {
         UserDefineItemDlg userDefine;
         userDefine.exec();
         break;
     }
-    case CREATE_IMAGE:
+    case WorkMode_ImageMake/*CREATE_IMAGE*/:
     {
         CreateImageItemDlg createImage;
         createImage.exec();
         break;
     }
-    case DUP_FROM_IMAGE:
+    case WorkMode_ImageCopy/*DUP_FROM_IMAGE*/:
     {
         DupFromImageItemDlg dupFromImage;
         dupFromImage.exec();
         break;
     }
-    case CLEAR_DISK:
+    case WorkMode_DiskClean/*CLEAR_DISK*/:
     {
         ClearDiskItemDlg clearDisk;
         clearDisk.exec();
@@ -109,14 +133,15 @@ void MainWindow::on_btnLockScreen_clicked()
 
 void MainWindow::on_btnStart_clicked()
 {
-    switch(g_pGcfgMainWindow->selectPattern())
+    switch(g_pGcfgMainWindow->workMode())
     {
-    case CREATE_IMAGE:
+    case WorkMode_ImageMake:
     {
         std::thread mkImageThd(makeImageThread);
         mkImageThd.detach();
         break;
     }
+//        case WorkMode_
     default:
         break;
     }
@@ -209,8 +234,8 @@ void MainWindow::initialConfig()
     //    CFileStatus status;
     //    CFile::GetStatus(strPath,status);
 
-        CUtils::WriteLogFile(m_hLogFile,FALSE,_T(""));
-        CUtils::WriteLogFile(m_hLogFile,FALSE,_T("********************************************************************************"));
+//        CUtils::WriteLogFile(m_hLogFile,FALSE,_T(""));
+//        CUtils::WriteLogFile(m_hLogFile,FALSE,_T("********************************************************************************"));
     //    CUtils::WriteLogFile(m_hLogFile,TRUE,_T("USBCopy Ver:%s BLD:%s"),CUtils::GetAppVersion(strPath),status.m_mtime.Format(_T("%Y-%m-%d")));
 
         // 读机器信息
@@ -417,7 +442,7 @@ void MainWindow::release()
     delete ui;
 }
 
-void MainWindow::makeImageThread()
+void *MainWindow::makeImageThread()
 {
     MakeImageDisk makeDiskImage;
     makeDiskImage.make();
@@ -493,7 +518,37 @@ void MainWindow::OnStart()
 
 }
 
-DWORD MainWindow::StartThreadProc(LPVOID lpParm)
+void *MainWindow::StartThreadProc(LPVOID lpParm)
+{
+
+}
+
+void *MainWindow::StopThreadProc(LPVOID lpParm)
+{
+
+}
+
+void *MainWindow::InitialMachineThreadProc(LPVOID lpParm)
+{
+
+}
+
+void *MainWindow::EnumDeviceThreadProc(LPVOID lpParm)
+{
+
+}
+
+void *MainWindow::BurnInTestThreadProc(LPVOID lpParm)
+{
+
+}
+
+void *MainWindow::ConnectSocketThreadProc(LPVOID lpParm)
+{
+
+}
+
+void *MainWindow::StartAsyncThreadProc(LPVOID lpParm)
 {
 
 }

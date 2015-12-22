@@ -36,13 +36,15 @@ public:
         DISK_NUM
     }DISK_INDEX;
     //静态方法
-    static HANDLE GetHandleOnPhysicalDrive(DISK_INDEX iDiskNumber,DWORD dwFlagsAndAttributes,PDWORD pdwErrorCode);
-    static HANDLE GetHandleOnVolume(TCHAR letter,DWORD dwFlagsAndAttributes,PDWORD pdwErrorCode);
-    static HANDLE GetHandleOnFile(LPCTSTR lpszFileName,DWORD dwCreationDisposition,DWORD dwFlagsAndAttributes,PDWORD pdwErrorCode);
+    static HANDLE GetHandleOnPhysicalDrive(CString strDiskPath,DWORD dwFlagsAndAttributes,PDWORD pdwErrorCode);
+    //open disk index of iDiskNumber,start from 0
+    static HANDLE GetHandleOnPhysicalDrive(int iDiskNumber, DWORD dwFlagsAndAttributes, PDWORD pdwErrorCode);
+    static HANDLE GetHandleOnVolume(CString letter,DWORD dwFlagsAndAttributes,PDWORD pdwErrorCode);
+    static HANDLE GetHandleOnFile(CString strFileName,DWORD dwFlagsAndAttributes,PDWORD pdwErrorCode);
     static ULONGLONG GetNumberOfSectors(HANDLE hDevice,PDWORD pdwBytesPerSector,MEDIA_TYPE *type);
     static void DeleteDirectory( LPCTSTR lpszPath );
     static BOOL CreateDisk(DISK_INDEX disk,ULONG PartitionNumber);
-    static BOOL DestroyDisk(DISK_INDEX disk);
+//    static BOOL DestroyDisk(DISK_INDEX disk);
     static BOOL DestroyDisk(HANDLE hDisk);
     static BOOL ChangeLetter(LPCTSTR lpszVolumeName,LPCTSTR lpszVolumePath);
     static BOOL GetDiskSymbol(LPCTSTR lpszVolumeName);
@@ -55,6 +57,7 @@ public:
     static BOOL GetDiskModelNameAndSerialNumber(HANDLE hDevice,LPTSTR lpszModulName,LPTSTR lpszSerialNum,DWORD *pdwErrorCode);
     static BOOL GetUsbHDDModelNameAndSerialNumber(HANDLE hDevice,LPTSTR lpszModulName,LPTSTR lpszSerialNum,DWORD *pdwErrorCode);
     static BOOL GetCFSerialNumber(HANDLE hDevice, LPTSTR lpszSerialNum, DWORD *pdwErrorCode);
+    BOOL GetFileSize(int fd, ULONGLONG &ullSize);
     // 公共方法
     void Init(HWND hWnd,LPBOOL lpCancel,HANDLE hLogFile,PortCommand *pCommand,UINT nBlockSectors);
     void SetMasterPort(CPort *port);
@@ -189,38 +192,39 @@ private:
     BOOL QuickClean(HANDLE hDisk,CPort *port,PDWORD pdwErrorCode);
 
     // 线程
-    static DWORD  ReadDiskThreadProc(LPVOID lpParm);
-    static DWORD  ReadImageThreadProc(LPVOID lpParm);
-    static DWORD  WriteDiskThreadProc(LPVOID lpParm);
-    static DWORD  WriteImageThreadProc(LPVOID lpParm);
-    static DWORD  VerifyThreadProc(LPVOID lpParm);
-    static DWORD  CompressThreadProc(LPVOID lpParm);
-    static DWORD  UnCompressThreadProc(LPVOID lpParm);
-    static DWORD  CleanDiskThreadProc(LPVOID lpParm);
-    static DWORD  VerifySectorThreadProc(LPVOID lpParm);
+    static void*  ReadDiskThreadProc(LPVOID lpParm);
+    static void*  ReadImageThreadProc(LPVOID lpParm);
+    static void*  WriteDiskThreadProc(LPVOID lpParm);
+    static void*  WriteDiskWithDataThreadProc(LPVOID lpParam);
+    static void*  WriteImageThreadProc(LPVOID lpParm);
+    static void*  VerifyThreadProc(LPVOID lpParm);
+    static void*  CompressThreadProc(LPVOID lpParm);
+    static void*  UnCompressThreadProc(LPVOID lpParm);
+    static void*  CleanDiskThreadProc(LPVOID lpParm);
+    static void*  VerifySectorThreadProc(LPVOID lpParm);
 
-    static DWORD  ReadFilesThreadProc(LPVOID lpParm);
-    static DWORD  WriteFilesThreadProc(LPVOID lpParm);
-    static DWORD  VerifyFilesThreadProc(LPVOID lpParm);
-    static DWORD  VerifyFilesByteThreadProc(LPVOID lpParm);
+    static void*  ReadFilesThreadProc(LPVOID lpParm);
+    static void*  WriteFilesThreadProc(LPVOID lpParm);
+    static void*  VerifyFilesThreadProc(LPVOID lpParm);
+    static void*  VerifyFilesByteThreadProc(LPVOID lpParm);
 
-    static DWORD  FormatDiskThreadProc(LPVOID lpParm);
+    static void*  FormatDiskThreadProc(LPVOID lpParm);
 
     // 2014-10-14 增量拷贝新增
-    static DWORD  SearchUserLogThreadProc(LPVOID lpParm);
-    static DWORD  DeleteChangeThreadProc(LPVOID lpParm);
-    static DWORD  EnumFileThreadProc(LPVOID lpParm);
-    static DWORD  ComputeHashThreadProc(LPVOID lpParm);
+    static void*  SearchUserLogThreadProc(LPVOID lpParm);
+    static void*  DeleteChangeThreadProc(LPVOID lpParm);
+    static void*  EnumFileThreadProc(LPVOID lpParm);
+    static void*  ComputeHashThreadProc(LPVOID lpParm);
 
     // 2014-11-21 卡检测
-    static DWORD  FullRWTestThreadProc(LPVOID lpParm);
-    static DWORD  FadePickerThreadProc(LPVOID lpParm);
-    static DWORD  SpeedCheckThreadProc(LPVOID lpParm);
+    static void*  FullRWTestThreadProc(LPVOID lpParm);
+    static void*  FadePickerThreadProc(LPVOID lpParm);
+    static void*  SpeedCheckThreadProc(LPVOID lpParm);
 
-    static DWORD  CompareCleanThreadProc(LPVOID lpParm);
+    static void*  CompareCleanThreadProc(LPVOID lpParm);
 
     // 2015-05-09 异步拷贝
-    static DWORD  CopyFilesAsyncThreadProc(LPVOID lpParm);
+    static void*  CopyFilesAsyncThreadProc(LPVOID lpParm);
     //        BOOL CopyFilesAsync(CPort *port, LPOVERLAPPED *pOverlapped);
     BOOL OnCopyFilesAsync();
 
@@ -289,8 +293,8 @@ private:
     HWND     m_hWnd;
     CUtils   m_utils;
     CIni     m_ini;
-    CPort    *m_MasterPort;
-    CPort    *m_SinglePort;
+    CPort    *m_pMasterPort;
+    CPort    *m_pSinglePort;
     PortList *m_TargetPorts;
     int      m_hLogFile;
     LPBOOL   m_lpCancel;
@@ -334,9 +338,10 @@ private:
 
     CDataQueue m_CompressQueue;
     CDataQueueList m_DataQueueList;
+    CDataQueue m_DataQueue;
 
     CStringArray  m_FileArray;
-    CStringArray  m_FodlerArray;
+    CStringArray  m_FolderArray;
 
     CMapStringToULL m_MapCopyFiles;
     CStringArray m_CopyFolderArray;
@@ -352,7 +357,7 @@ private:
     BOOL m_bCompressComplete; //压缩线程和解压线程是否结束
 
     //映像拷贝参数
-    //    SOCKET m_ClientSocket;
+    SOCKET m_ClientSocket;
     BOOL   m_bServerFirst;
 
     //映像制作参数

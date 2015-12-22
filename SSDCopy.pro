@@ -62,7 +62,9 @@ SOURCES += main.cpp\
     UI/userdefineitemdlg.cpp \
     UI/varisizedupitemdlg.cpp \
     UI/viewimagedlg.cpp \
-    Disk/makeimagedisk.cpp
+    Disk/makeimagedisk.cpp \
+    Thread/mythread.cpp \
+    common/PrintMacros.cpp
 
 HEADERS  += mainwindow.h \
     SerialPortCommand/PortCommand.h \
@@ -80,7 +82,6 @@ HEADERS  += mainwindow.h \
     GlobalData/gcfgquickdup.h \
     GlobalData/gcfgmainwindow.h \
     net/netcommunication.h \
-    Disk/disk.h \
     HashMethod/Checksum32.h \
     HashMethod/CRC32.h \
     HashMethod/HashMethod.h \
@@ -111,7 +112,10 @@ HEADERS  += mainwindow.h \
     UI/varisizedupitemdlg.h \
     UI/viewimagedlg.h \
     config.h \
-    Disk/makeimagedisk.h
+    Disk/makeimagedisk.h \
+    Thread/mythread.h \
+    Disk/disk.h \
+    common/PrintMacros.h
 
 FORMS    += mainwindow.ui \
     UI/capconvertdupitemdlg.ui \

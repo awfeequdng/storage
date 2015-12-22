@@ -26,43 +26,44 @@ SelectCurPatternDlg::~SelectCurPatternDlg()
 
 void SelectCurPatternDlg::on_btnQuickDup_clicked()
 {
-    g_pGcfgMainWindow->setSelectPattern(QUICK_DUP);
+    g_pGcfgMainWindow->setWorkMode(WorkMode_QuickCopy);
+
     this->close();
 }
 
 void SelectCurPatternDlg::on_btnCreateImage_clicked()
 {
-    g_pGcfgMainWindow->setSelectPattern(CREATE_IMAGE);
+    g_pGcfgMainWindow->setWorkMode(WorkMode_ImageMake);
     this->close();
 }
 
 void SelectCurPatternDlg::on_btnGlobalDup_clicked()
 {
-    g_pGcfgMainWindow->setSelectPattern(GLOBAL_DUP);
+    g_pGcfgMainWindow->setWorkMode(WorkMode_FullCopy);
     this->close();
 }
 
 void SelectCurPatternDlg::on_btnDupFromImage_clicked()
 {
-    g_pGcfgMainWindow->setSelectPattern(DUP_FROM_IMAGE);
+    g_pGcfgMainWindow->setWorkMode(WorkMode_ImageCopy);
     this->close();
 }
 
 void SelectCurPatternDlg::on_btnCapConvertDup_clicked()
 {
-    g_pGcfgMainWindow->setSelectPattern(CAP_CONVERT_DUP);
+    g_pGcfgMainWindow->setWorkMode(WorkMode_DifferenceCopy);
     this->close();
 }
 
 void SelectCurPatternDlg::on_btnClearDisk_clicked()
 {
-    g_pGcfgMainWindow->setSelectPattern(CLEAR_DISK);
+    g_pGcfgMainWindow->setWorkMode(WorkMode_DiskClean);
     this->close();
 }
 
 void SelectCurPatternDlg::on_btnUserDefine_clicked()
 {
-    g_pGcfgMainWindow->setSelectPattern(USER_DEFINE_DUP);
+    g_pGcfgMainWindow->setWorkMode(WorkMode_UserDefine);
     this->close();
 }
 

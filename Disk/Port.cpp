@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
+
 #define ASSERT(exp) assert(exp)
 
 CPort::CPort(void)
@@ -45,7 +46,9 @@ void CPort::InitialAsync()
 	m_strFileName = _T("");
 
 	// 起止时间
-//	m_StartTime = m_EndTime = CTime::GetCurrentTime();
+    struct timeval tval;
+    gettimeofday(&tval,NULL);
+    m_StartTime = m_EndTime = tval;
 
 	// 计算
 	m_ullValidSize = 0;
@@ -86,7 +89,9 @@ void CPort::Initial()
 	m_strFileName = _T("");
 
 	// 起止时间
-//	m_StartTime = m_EndTime = CTime::GetCurrentTime();
+    struct timeval tval;
+    gettimeofday(&tval,NULL);
+    m_StartTime = m_EndTime = tval;
 
 	// 计算
 	m_ullValidSize = 0;
@@ -110,7 +115,9 @@ void CPort::Initial()
 void CPort::Reset()
 {
 	// 起止时间
-//	m_StartTime = m_EndTime = CTime::GetCurrentTime();
+    struct timeval tval;
+    gettimeofday(&tval,NULL);
+    m_StartTime = m_EndTime = tval;
 
 	// 计算
 	m_ullValidSize = 0;
@@ -269,13 +276,30 @@ void CPort::SetDiskNum( int iNum )
 
 void CPort::SetVolumeArray( const CStringArray& strVolumeArray )
 {
-//	m_strVolumeArray.Copy(strVolumeArray);
+
+    m_strVolumeArray.clear();
+    CStringArray::const_iterator it = strVolumeArray.begin();
+    CStringArray::const_iterator it_end = strVolumeArray.end();
+
+    while(it != it_end)
+    {
+        m_strVolumeArray.push_back((*it));
+        it++;
+    }
 
 }
 
 void CPort::GetVolumeArray( CStringArray& strVolumeArray )
 {
-//	strVolumeArray.Copy(m_strVolumeArray);
+    strVolumeArray.clear();
+    CStringArray::const_iterator it = m_strVolumeArray.begin();
+    CStringArray::const_iterator it_end = m_strVolumeArray.end();
+
+    while(it != it_end)
+    {
+        strVolumeArray.push_back((*it));
+        it++;
+    }
 }
 
 ULONGLONG CPort::GetTotalSize()
@@ -386,25 +410,27 @@ void CPort::SetFileName( CString strFile )
 	m_strFileName = strFile;
 }
 
-//void CPort::SetStartTime( CTime time )
-//{
-//	m_StartTime = time;
-//}
+void CPort::SetStartTime(struct timeval time )
+{
 
-//CTime CPort::GetStartTime()
-//{
-//	return m_StartTime;
-//}
+    m_StartTime = time;
+}
 
-//void CPort::SetEndTime( CTime time )
-//{
-//	m_EndTime = time;
-//}
+struct timeval CPort::GetStartTime()
+{
+    return m_StartTime;
+}
+//struct timeval tval;
+//gettimeofday(&tval,NULL);
+void CPort::SetEndTime( struct timeval time )
+{
+    m_EndTime = time;
+}
 
-//CTime CPort::GetEndTime()
-//{
-//	return m_EndTime;
-//}
+struct timeval CPort::GetEndTime()
+{
+    return m_EndTime;
+}
 
 ULONGLONG CPort::GetValidSize()
 {
@@ -747,6 +773,14 @@ void CPort::AddBadBlock( ULONGLONG ullSectorNum )
 void CPort::GetBadBlockArray( CULLArray &ullBadBlockArray )
 {
 //	ullBadBlockArray.Copy(m_BadBlockArray);
+    ullBadBlockArray.clear();
+    CULLArray::const_iterator it = m_BadBlockArray.begin();
+    CULLArray::const_iterator it_end = m_BadBlockArray.end();
+    while(it != it_end)
+    {
+        ullBadBlockArray.push_back((*it));
+        it++;
+    }
 }
 
 int CPort::GetBadBlockCount()

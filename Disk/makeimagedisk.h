@@ -76,13 +76,12 @@ private:
             PDWORD pdwErrorCode,
             DWORD dwTimeOut= 50000);
 
-    BOOL ReadDisk();
-    BOOL ReadImage();
 
-    static void  ReadDiskThreadProc();
-    static void  ReadImageThreadProc();
-    static void  WriteDiskThreadProc();
-    static void  WriteImageThreadProc();
+
+    static void  ReadDiskThreadProc(LPVOID *param);
+    static void  ReadImageThreadProc(LPVOID *param);
+    static void  WriteDiskThreadProc(LPVOID *param);
+    static void  WriteImageThreadProc(LPVOID *param);
 private:
     CString  m_strImagePath;
     HANDLE   m_hImage;
@@ -110,9 +109,11 @@ private:
     BOOL    m_bDataCompress;
     BOOL    m_bServerFirst;
 
-    BOOL WriteImage(CDataQueue *pDataQueue);
-    BOOL WriteLocalImage(CDataQueue *pDataQueue);
-    BOOL WriteRemoteImage(CDataQueue *pDataQueue);
+    BOOL ReadDisk();
+    BOOL ReadImage();
+    BOOL WriteImage();
+    BOOL WriteLocalImage();
+    BOOL WriteRemoteImage();
     BOOL GetFileSize(int fd,ULONGLONG &ullSize);
     BootSector GetBootSectorType(const PBYTE pXBR);
     ULONGLONG ReadOffset(const PBYTE pByte, DWORD offset, BYTE bytes);

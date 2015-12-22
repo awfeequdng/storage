@@ -1,5 +1,7 @@
  #include "cini.h"
 
+#include <QSettings>
+#include <sstream>
 CIni::CIni()
 {
 
@@ -28,6 +30,18 @@ BOOL CIni::GetBool(std::string field, std::string key, BOOL b)
 
 }
 
+void CIni::WriteBool(string field, string key, BOOL b)
+{
+    std::ostringstream ostr;
+    ostr<<(!!b);
+    std::string str(ostr.str());
+    MapFieldKey fieldKey;
+    fieldKey[field] = key;
+    m_fieldKeyValue[fieldKey] = str;
+    QSettings settings(QString(m_configFileName.c_str()),QSettings::IniFormat);
+    settings.setValue(QString((field+"/"+key).c_str()),QString(str.c_str()));
+}
+
 UINT CIni::GetUInt(std::string field, std::string key, UINT u)
 {
     MapFieldKey fieldKey;
@@ -41,6 +55,18 @@ UINT CIni::GetUInt(std::string field, std::string key, UINT u)
     {
         return u;
     }
+}
+
+void CIni::WriteUInt(string field, string key, UINT u)
+{
+    std::ostringstream ostr;
+    ostr<<u;
+    std::string str(ostr.str());
+    MapFieldKey fieldKey;
+    fieldKey[field] = key;
+    m_fieldKeyValue[fieldKey] = str;
+    QSettings settings(QString(m_configFileName.c_str()),QSettings::IniFormat);
+    settings.setValue(QString((field+"/"+key).c_str()),QString(str.c_str()));
 }
 
 INT CIni::GetInt(std::string field, std::string key, INT s)
@@ -58,6 +84,18 @@ INT CIni::GetInt(std::string field, std::string key, INT s)
     }
 }
 
+void CIni::WriteInt(string field, string key, INT s)
+{
+    std::ostringstream ostr;
+    ostr<<s;
+    std::string str(ostr.str());
+    MapFieldKey fieldKey;
+    fieldKey[field] = key;
+    m_fieldKeyValue[fieldKey] = str;
+    QSettings settings(QString(m_configFileName.c_str()),QSettings::IniFormat);
+    settings.setValue(QString((field+"/"+key).c_str()),QString(str.c_str()));
+}
+
 double CIni::GetDouble(std::string field, std::string key, double d)
 {
     MapFieldKey fieldKey;
@@ -73,6 +111,18 @@ double CIni::GetDouble(std::string field, std::string key, double d)
     }
 }
 
+void CIni::WriteDouble(string field, string key, double d)
+{
+    std::ostringstream ostr;
+    ostr<<d;
+    std::string str(ostr.str());
+    MapFieldKey fieldKey;
+    fieldKey[field] = key;
+    m_fieldKeyValue[fieldKey] = str;
+    QSettings settings(QString(m_configFileName.c_str()),QSettings::IniFormat);
+    settings.setValue(QString((field+"/"+key).c_str()),QString(str.c_str()));
+}
+
 string CIni::GetString(string field, string key, string str)
 {
     MapFieldKey fieldKey;
@@ -86,6 +136,15 @@ string CIni::GetString(string field, string key, string str)
     {
         return str;
     }
+}
+
+void CIni::WriteString(string field, string key, string str)
+{
+    MapFieldKey fieldKey;
+    fieldKey[field] = key;
+    m_fieldKeyValue[fieldKey] = str;
+    QSettings settings(QString(m_configFileName.c_str()),QSettings::IniFormat);
+    settings.setValue(QString((field+"/"+key).c_str()),QString(str.c_str()));
 }
 
 BOOL CIni::IsKeyExist(std::string field, std::string key)

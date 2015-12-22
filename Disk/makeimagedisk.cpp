@@ -6,8 +6,15 @@
 
 #include <thread>
 
+//#define HIDE_SECTORS  0x800   // 1M
+//#define COMPRESS_THREAD_COUNT 3
+//extern BOOL g_bFilecopyType;
+
+
+
 MakeImageDisk::MakeImageDisk()
 {
+
     m_hDisk = -1;
     m_hImage = -1;
 
@@ -22,7 +29,7 @@ MakeImageDisk::MakeImageDisk()
 
     m_bReadDiskOver = FALSE;
 
-    m_strDiskPath = "/dev/sdb";
+    m_strDiskPath = "/dev/nvme0n1";
     m_strImagePath = "/home/caipengxiang/image";
 
     m_hDisk = open(m_strDiskPath.c_str(),O_RDONLY);
@@ -65,7 +72,6 @@ BOOL MakeImageDisk::make()
     ReadFile(m_hDisk,pByte,512,readLen,0);
 
 
-
     if(BriefAnalyze())
     {
         std::cout<<"brief analyze over!"<<std::endl;
@@ -75,6 +81,15 @@ BOOL MakeImageDisk::make()
         std::cout<<"analyze file system failed!"<<std::endl;
     }
 //    Sleep(5000);
+
+//    std::thread readDiskThd(ReadDiskThreadProc,this);
+//    std::thread writeImageThd(WriteImageThreadProc,this);
+
+//    readDiskThd.join();
+//    std::cout<<"read disk thread finished!"<<std::endl;
+//    writeImageThd.join();
+//    std::cout<<"write image thread finished!"<<std::endl;
+
     return FALSE;
 }
 CString MakeImageDisk::strImagePath() const
@@ -146,9 +161,33 @@ BOOL MakeImageDisk::ReadSectors(HANDLE hDevice, ULONGLONG ullStartSector, DWORD 
         return TRUE;
     }
 }
-
+#include <errno.h>
 BOOL MakeImageDisk::ReadFile(HANDLE hDevice, LPBYTE lpSectBuff, DWORD dwLen, DWORD &dwReadLen, ULONGLONG offset)
 {
+    //从一个描述符读取n个字节
+
+//    int fd = hDevice;
+//    void *vptr = lpSectBuff;
+//    size_t n= dwLen;
+
+//     size_t  nleft = n;  //记录还剩下多少字节数没读取
+//     ssize_t nread;      //记录已经读取的字节数
+//     char*  ptr = (char *)vptr;  //指向要读取数据的指针
+//     while(nleft > 0)    //还有数据要读取
+//     {
+//      if(nread = pread(fd,ptr,nleft,offset+n-nleft) < 0)
+//       if(errno == EINTR)//系统被一个捕获的信号中断
+//        nread = 0;       //再次读取
+//       else
+//        return FALSE;       //返回
+//      else if(nread == 0)//没有出错但是也没有读取到数据
+//       break;            //再次读取
+//      nleft -= nread;    //计算剩下未读取的字节数
+//      ptr  += nread;     //移动指针到以读取数据的下一个位置
+//     }
+//     dwReadLen = n-nleft;
+//     return (n-nleft);   //返回读取的字节数
+
     int n;
     if((n = pread(hDevice,lpSectBuff,dwLen,offset))>0)
     {
@@ -273,6 +312,7 @@ BOOL MakeImageDisk::ReadDisk()
     ZeroMemory(pByte,dwLen);
 
     m_bReadDiskOver = FALSE;
+
     while (itEff != itEff_end )
     {
         EFF_DATA effData = (*itEff);
@@ -406,24 +446,28 @@ BOOL MakeImageDisk::ReadImage()
     }
 }
 
-void MakeImageDisk::ReadDiskThreadProc()
+void MakeImageDisk::ReadDiskThreadProc(LPVOID *param)
+{
+    MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
+    Sleep(1000);
+    pMakeImage->ReadDisk();
+}
+
+void MakeImageDisk::ReadImageThreadProc(LPVOID *param)
 {
 
 }
 
-void MakeImageDisk::ReadImageThreadProc()
+void MakeImageDisk::WriteDiskThreadProc(LPVOID *param)
 {
 
 }
 
-void MakeImageDisk::WriteDiskThreadProc()
+void MakeImageDisk::WriteImageThreadProc(LPVOID *param)
 {
-
-}
-
-void MakeImageDisk::WriteImageThreadProc()
-{
-
+    MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
+    Sleep(1000);
+    pMakeImage->WriteImage();
 }
 
 
@@ -909,19 +953,19 @@ void MakeImageDisk::setNBlockSectors(const DWORD &nBlockSectors)
 
 
 
-BOOL MakeImageDisk::WriteImage(CDataQueue *pDataQueue )
+BOOL MakeImageDisk::WriteImage()
 {
     if (m_bServerFirst)
     {
-        return WriteRemoteImage(pDataQueue);
+        return WriteRemoteImage();
     }
     else
     {
-        return WriteLocalImage(pDataQueue);
+        return WriteLocalImage();
     }
 }
 
-BOOL MakeImageDisk::WriteLocalImage(CDataQueue *pDataQueue)
+BOOL MakeImageDisk::WriteLocalImage()
 {
     BOOL bResult = TRUE;
     DWORD dwErrorCode = 0;
@@ -930,6 +974,7 @@ BOOL MakeImageDisk::WriteLocalImage(CDataQueue *pDataQueue)
     ULONGLONG ullOffset = SIZEOF_IMAGE_HEADER;
     DWORD dwLen = 0;
 
+    CDataQueue *pDataQueue = &m_DataQueue;
 
     if (m_hImage)
     {
@@ -1031,7 +1076,7 @@ BOOL MakeImageDisk::WriteLocalImage(CDataQueue *pDataQueue)
     return bResult;
 }
 
-BOOL MakeImageDisk::WriteRemoteImage(CDataQueue *pDataQueue)
+BOOL MakeImageDisk::WriteRemoteImage()
 {
 //	BOOL bResult = TRUE;
 //	DWORD dwErrorCode = 0;
@@ -1583,8 +1628,9 @@ BootSector MakeImageDisk::GetBootSectorType( const PBYTE pXBR )
     // EB 76 90 -> EXFAT
     */
     MASTER_BOOT_RECORD mbr;
-    ZeroMemory(&mbr,sizeof(MASTER_BOOT_RECORD));
-    memcpy(&mbr,pXBR,sizeof(MASTER_BOOT_RECORD));
+    int mbrsize = sizeof(MASTER_BOOT_RECORD);
+    ZeroMemory(&mbr,mbrsize);
+    memcpy(&mbr,pXBR,mbrsize);
 
     if (mbr.Signature != 0xAA55)
     {
@@ -1911,8 +1957,6 @@ BOOL MakeImageDisk::AppendEffDataList( const PBYTE pDBR,FileSystem fileSystem,UL
 
         }
         break;
-
-
     case FileSystem_EXFAT:
         {
             EXFAT_INFO exfatInfo;
@@ -2046,7 +2090,6 @@ BOOL MakeImageDisk::AppendEffDataList( const PBYTE pDBR,FileSystem fileSystem,UL
 
         }
         break;
-
     case FileSystem_NTFS:
         {
             NTFS_INFO ntfsInfo;
@@ -2206,7 +2249,6 @@ BOOL MakeImageDisk::AppendEffDataList( const PBYTE pDBR,FileSystem fileSystem,UL
 
         }
         break;
-
     case FileSystem_EXT_X:
         {
             ULONGLONG ullTempStartSector = ullStartSector + 1024/m_dwBytesPerSector;
@@ -2508,6 +2550,7 @@ BOOL MakeImageDisk::AppendEffDataList( const PBYTE pDBR,FileSystem fileSystem,UL
         break;
 
     case FileSystem_UNKNOWN:
+    default:
         {
             // 不识别的文件系统，拷贝所有资料
             EFF_DATA effData;

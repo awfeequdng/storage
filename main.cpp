@@ -12,7 +12,7 @@
 #include "GlobalData/gcfgquickdup.h"
 #include "GlobalData/gcfgrunbatchcmd.h"
 
-
+#include "common/cini.h"
 GcfgCapConvertDup   *g_pGcfgCapConvertDup;
 GcfgCleanDisk       *g_pGcfgCleanDisk;
 GcfgDupFromImage    *g_pGcfgDupFromImage;
@@ -35,6 +35,10 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
+
+    CIni config;
+    config.SetPathName("/home/caipengxiang/test.ini");
+    config.WriteDouble("test","cai",2.3);
 
     int ret = a.exec();
 

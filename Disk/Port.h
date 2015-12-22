@@ -7,8 +7,8 @@
 
 #include "common/cstring.h"
 #include <vector>
-//#include <ctime>
-#include <chrono>
+
+#include <sys/time.h>
 
 class CPort
 {
@@ -45,10 +45,10 @@ private:
 	// 映像
 	CString m_strFileName;
 
-//	// 起止时间
-//	CTime m_StartTime;
-//	CTime m_EndTime;
-//    std::chrono::system_clock::now();
+    // 起止时间
+    struct timeval m_StartTime;
+    struct timeval m_EndTime;
+
 	// 计算
 	volatile ULONGLONG m_ullValidSize;
 	volatile ULONGLONG m_ullCompleteSize;
@@ -138,11 +138,11 @@ public:
 	void SetFileName(CString strFile);
 
 //	// 起止时间
-//	void SetStartTime(CTime time);
-//	CTime GetStartTime();
+    void SetStartTime(struct timeval time);
+    struct timeval GetStartTime();
 
-//	void SetEndTime(CTime time);
-//	CTime GetEndTime();
+    void SetEndTime(struct timeval time);
+    struct timeval GetEndTime();
 
 	// 计算
 	ULONGLONG GetValidSize();

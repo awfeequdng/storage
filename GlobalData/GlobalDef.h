@@ -7,6 +7,7 @@
 #include <map>
 #include <mutex>
 #include <QWidget>
+#include <unistd.h>
 
 typedef unsigned char       UCHAR;
 typedef char                CHAR;
@@ -37,7 +38,7 @@ typedef int                 HANDLE;
 typedef QWidget *           HWND;
 typedef QWidget             CWnd;
 
-typedef char  TCHAR;
+//typedef char  TCHAR;
 typedef void * MEDIA_TYPE;
 typedef int  SOCKET;
 
@@ -108,6 +109,15 @@ typedef struct STRUCT_OVERLAPPED
     std::mutex mx;      //mutex
 }OVERLAPPED,*LPOVERLAPPED;
 
+
+typedef struct _STRUCT_LPVOID_PARM
+{
+    LPVOID lpVoid1;   //CDisk
+    LPVOID lpVoid2;   //CPort
+    LPVOID lpVoid3;   //CHashMethod or CDataQueue
+    LPVOID lpVoid4;   //Other
+}VOID_PARM,*LPVOID_PARM;
+
 typedef enum _ENUM_MACHINE_TYPE
 {
 	MT_TS,
@@ -173,6 +183,7 @@ typedef enum _ENUM_WORK_MODE
 	WorkMode_DiskClean,
 	WorkMode_DiskCompare,
 	WorkMode_DiskFormat,
+    WorkMode_UserDefine,
 	WorkMode_MTPCopy,
 	WorkMode_Full_RW_Test,
 	WorkMode_Fade_Picker,
@@ -306,7 +317,7 @@ typedef enum _ENUM_IMAGE_TYPE
 	FILE_IMAGE
 }ImageType;
 
-//#pragma pack(push,1)
+#pragma pack(push,1)
 /****************************************************************************
 *     分区表项结构(16字节)
 ****************************************************************************/
@@ -320,8 +331,8 @@ typedef struct _STRUCT_PARTITION_ENTRY
 	UCHAR EndHead;   // 该分区终止磁头号
 	UCHAR EndSector;   // 终止柱面号高2位：6位终止扇区号
 	UCHAR EndCylinder;  // 终止柱面号低8位
-	ULONG StartLBA;   // 起始扇区号
-	ULONG TotalSector;  // 分区尺寸（总扇区数）
+    DWORD StartLBA;   // 起始扇区号                          4 byte
+    DWORD TotalSector;  // 分区尺寸（总扇区数）                4 byte
 }PARTITION_ENTRY,*PPARTITION_ENTRY;
 
 /****************************************************************************
@@ -338,19 +349,19 @@ typedef struct _STRUCT_MASTER_BOOT_RECORD
 typedef struct _STRUCT_EFI_HEAD_INFO
 {
 	UCHAR Signature[8];                // 00~07 8
-	ULONG RevisionNumber;              // 08~0B 4
-	ULONG HeaderSize;                  // 0C~0F 4
-	ULONG CRC32Checksum;               // 10~13 4
-	ULONG Reserver;                    // 14~17 4
+    DWORD RevisionNumber;              // 08~0B 4
+    DWORD HeaderSize;                  // 0C~0F 4
+    DWORD CRC32Checksum;               // 10~13 4
+    DWORD Reserver;                    // 14~17 4
 	ULONGLONG PrimaryLBA;              // 18~1F 8
 	ULONGLONG BackupLBA;               // 20~27 8
 	ULONGLONG FirstUsableLBA;          // 28~2F 8
 	ULONGLONG LastUsableLBA;           // 30~37 8
 	UCHAR DiskGUID[16];                // 38~47 16
 	ULONGLONG PartitionEntryLBA;       // 48~4F 8
-	ULONG MaxNumberOfPartitionEntries; // 50~53 4
-	ULONG SizeOfPartitionEntry;        // 54~57 4
-	ULONG PartitionEntryArrayCRC32;    // 58~5B 4
+    DWORD MaxNumberOfPartitionEntries; // 50~53 4
+    DWORD SizeOfPartitionEntry;        // 54~57 4
+    DWORD PartitionEntryArrayCRC32;    // 58~5B 4
 }EFI_HEAD,*PEFI_HEAD;
 
 // GPT分区表项数据结构
@@ -364,7 +375,7 @@ typedef struct _STRUCT_GPT_PARTITION_ENTRY
 	UCHAR     PartitionName[72];     // 38~7F 72  Unicode
 }GPT_PARTITION_ENTRY,*PGPT_PARTITION_ENTRY;
 
-//#pragma pack(pop)
+#pragma pack(pop)
 
 // 有效数据
 typedef struct _STRUCT_EFF_DATA
@@ -378,6 +389,7 @@ typedef struct _STRUCT_EFF_DATA
 typedef std::list<EFF_DATA> EFF_LIST;
 typedef std::list<EFF_DATA> *PEFF_LIST;
 
+#pragma pack(push,1)
 typedef struct _STRUCT_FAT_INFO
 {
 	WORD  wBytesPerSector;     // 0B~0C 2
@@ -415,6 +427,8 @@ typedef struct _STRUCT_NTFS_INFO
 	ULONGLONG ullStartSector;
 }NTFS_INFO,*PNTFS_INFO;
 
+#pragma pack(pop)
+
 typedef struct _STRUCT_SUPER_BLOCK_INFO
 {
 	DWORD dwBlocksOfVolume;   // 04~07 4
@@ -445,7 +459,7 @@ typedef std::list<RANGE_FROM_TO> CListRangeFromTo;
 #define ZIP_VERSION   "1.28"
 #define APP_VERSION   "1.0.0"
 
-//#pragma pack(push, 1)
+#pragma pack(push, 1)
 typedef struct _STRUCT_IMAGE_HEADER
 {
 	char      szImageFlag[8];  //8
@@ -471,7 +485,7 @@ typedef struct _STRUCT_IMAGE_HEADER
 	BYTE      byEnd; //1
 }IMAGE_HEADER,*PIMAGE_HEADER;
 
-//#pragma pack(pop)
+#pragma pack(pop)
 
 
 //////////////////////////////////////////////////////////////////////////

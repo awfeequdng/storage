@@ -79,7 +79,7 @@ private:
     void initialConfig();
     void release();
 
-    static void makeImageThread();
+    static void *makeImageThread();
 
 private:
     Ui::MainWindow *ui;
@@ -109,8 +109,8 @@ private:
     QSerialPort   m_SerialPort;
     PortCommand  m_Command;
 
-//    CTime         m_StartTime;
-//    CTime         m_StartTimeTemp;
+    struct timeval         m_StartTime;
+    struct timeval         m_StartTimeTemp;
 
 //    CFont         m_font;
 //    CFont         m_LogoFont;
@@ -192,13 +192,13 @@ private:
 
     void BackupLogfile(HANDLE hFile,DWORD dwFileSize);
 
-    static DWORD  StartThreadProc(LPVOID lpParm);
-    static DWORD  StopThreadProc(LPVOID lpParm);
-    static DWORD  InitialMachineThreadProc(LPVOID lpParm);
-    static DWORD  EnumDeviceThreadProc(LPVOID lpParm);
-    static DWORD  BurnInTestThreadProc(LPVOID lpParm);
-    static DWORD  ConnectSocketThreadProc(LPVOID lpParm);
-    static DWORD  StartAsyncThreadProc(LPVOID lpParm);
+    static void * StartThreadProc(LPVOID lpParm);
+    static void * StopThreadProc(LPVOID lpParm);
+    static void * InitialMachineThreadProc(LPVOID lpParm);
+    static void * EnumDeviceThreadProc(LPVOID lpParm);
+    static void * BurnInTestThreadProc(LPVOID lpParm);
+    static void * ConnectSocketThreadProc(LPVOID lpParm);
+    static void * StartAsyncThreadProc(LPVOID lpParm);
 
     void BurnInTest();
     DWORD UploadLog(CString strLogName,CString strLog);
