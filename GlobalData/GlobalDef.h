@@ -94,9 +94,12 @@ typedef unsigned long long uint64_t;
 #define IDE_ATAPI_IDENTIFY 0xA1   // 读取ATAPI设备的命令
 #define IDE_ATA_IDENTIFY  0xEC   // 读取ATA设备的命
 
-
+#include <stdio.h>
+#include <sys/unistd.h>
 inline DWORD GetLastError(){return 0;}
 inline void Sleep(int ms){usleep(ms*1000);}
+inline void DeleteFile(CString strLogFile){ unlink(strLogFile.c_str());}
+inline BOOL PathFileExists(CString strRecentConfig){return access(strRecentConfig.c_str(),F_OK);}
 
 #ifndef ZeroMemory
 #define ZeroMemory(pByte,size) memset(pByte,0,size)

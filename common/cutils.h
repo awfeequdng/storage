@@ -27,6 +27,8 @@ public:
     {
         return GetAppVersion(path.stdStr());
     }
+    static std::string GetAppPath();
+    static std::string GetFilePathWithoutName(CString str);
 };
 
 #endif // CUTILS_H

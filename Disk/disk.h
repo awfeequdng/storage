@@ -57,7 +57,7 @@ public:
     static BOOL GetDiskModelNameAndSerialNumber(HANDLE hDevice,LPTSTR lpszModulName,LPTSTR lpszSerialNum,DWORD *pdwErrorCode);
     static BOOL GetUsbHDDModelNameAndSerialNumber(HANDLE hDevice,LPTSTR lpszModulName,LPTSTR lpszSerialNum,DWORD *pdwErrorCode);
     static BOOL GetCFSerialNumber(HANDLE hDevice, LPTSTR lpszSerialNum, DWORD *pdwErrorCode);
-    BOOL GetFileSize(int fd, ULONGLONG &ullSize);
+    static BOOL GetFileSize(int fd, ULONGLONG &ullSize);
     // 公共方法
     void Init(HWND hWnd,LPBOOL lpCancel,HANDLE hLogFile,PortCommand *pCommand,UINT nBlockSectors);
     void SetMasterPort(CPort *port);

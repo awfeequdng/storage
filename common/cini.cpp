@@ -9,6 +9,10 @@ CIni::CIni()
 
 int CIni::SetPathName(std::string fileName)
 {
+    if(!m_configFileName.empty())
+    {
+        m_fieldKeyValue.clear();
+    }
     m_configFileName = fileName;
     ReadIniFile(fileName);
     return 0;

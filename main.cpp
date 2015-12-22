@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include <QApplication>
-
+#include <QString>
 #include "GlobalData/gcfgcapconvertdup.h"
 #include "GlobalData/gcfgcleandisk.h"
 #include "GlobalData/gcfgdupfromimage.h"
@@ -13,6 +13,7 @@
 #include "GlobalData/gcfgrunbatchcmd.h"
 
 #include "common/cini.h"
+#include "common/cutils.h"
 GcfgCapConvertDup   *g_pGcfgCapConvertDup;
 GcfgCleanDisk       *g_pGcfgCleanDisk;
 GcfgDupFromImage    *g_pGcfgDupFromImage;
@@ -39,7 +40,8 @@ int main(int argc, char *argv[])
     CIni config;
     config.SetPathName("/home/caipengxiang/test.ini");
     config.WriteDouble("test","cai",2.3);
-
+    std::cout<<CUtils::GetAppPath()<<std::endl;
+    std::cout<<CUtils::GetFilePathWithoutName(CUtils::GetAppPath())<<std::endl;
     int ret = a.exec();
 
     releaseData();

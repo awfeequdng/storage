@@ -42,7 +42,7 @@ public:
     {
         return GetDouble(key.stdStr(),value.stdStr(),d);
     }
-    inline CString GetString(CString key,CString value,CString str)
+    inline CString GetString(CString key,CString value,CString str=CString())
     {
         std::string strTmp = GetString(key.stdStr(),value.stdStr(),str.stdStr());
         return CString(strTmp);
@@ -89,11 +89,11 @@ public:
     {
         WriteDouble(std::string(field),std::string(key),d);
     }
-    inline std::string GetString(const char * field,const char * key,const char *str)
-    {
-        return GetString(std::string(field),std::string(key),std::string(str));
-    }
-    inline std::string GetString(const char * field,const char * key,std::string str)
+//    inline std::string GetString(const char * field,const char * key,const char *str=NULL)
+//    {
+//        return GetString(std::string(field),std::string(key),std::string(str));
+//    }
+    inline std::string GetString(const char * field,const char * key,std::string str=std::string())
     {
         return GetString(std::string(field),std::string(key),str);
     }
@@ -116,7 +116,7 @@ public:
     void WriteInt(std::string field, std::string key,INT s);
     double GetDouble(std::string field, std::string key, double d);
     void WriteDouble(std::string field,std::string key,double d);
-    std::string GetString(std::string field,std::string key,std::string str);
+    std::string GetString(std::string field,std::string key,std::string str=std::string());
     void WriteString(std::string field,std::string key,std::string str);
     BOOL IsKeyExist(std::string field, std::string key);
     void ReadIniFile(std::string filename);

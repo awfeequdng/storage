@@ -76,7 +76,7 @@ private slots:
     void on_btnGiveUp_clicked();
 private:
     void initial();
-    void initialConfig();
+    BOOL initialConfig();
     void release();
 
     static void *makeImageThread();
