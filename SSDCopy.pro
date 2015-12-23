@@ -40,8 +40,6 @@ SOURCES += main.cpp\
     common/cini.cpp \
     common/cstring.cpp \
     common/cutils.cpp \
-    common/readfile.cpp \
-    common/writfile.cpp \
     Disk/DataQueue.cpp \
     Disk/Port.cpp \
     UI/capconvertdupitemdlg.cpp \
@@ -89,8 +87,6 @@ HEADERS  += mainwindow.h \
     common/cini.h \
     common/cstring.h \
     common/cutils.h \
-    common/readfile.h \
-    common/writfile.h \
     Disk/DataQueue.h \
     Disk/Port.h \
     UI/capconvertdupitemdlg.h \

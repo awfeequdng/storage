@@ -39,6 +39,7 @@ protected:
     BOOL ReadLocalImage();
     BOOL WriteDisk(CString strDskPath, CDataQueue *pDataQueue);
 private:
+
     BOOL ReadSectors(HANDLE hDevice,
             ULONGLONG ullStartSector,
             DWORD dwSectors,
@@ -78,10 +79,10 @@ private:
 
 
 
-    static void  ReadDiskThreadProc(LPVOID *param);
-    static void  ReadImageThreadProc(LPVOID *param);
-    static void  WriteDiskThreadProc(LPVOID *param);
-    static void  WriteImageThreadProc(LPVOID *param);
+    static void *ReadDiskThreadProc(LPVOID param);
+    static void *ReadImageThreadProc(LPVOID param);
+    static void *WriteDiskThreadProc(LPVOID param);
+    static void *WriteImageThreadProc(LPVOID param);
 private:
     CString  m_strImagePath;
     HANDLE   m_hImage;

@@ -17,7 +17,7 @@ typedef unsigned short      USHORT;
 typedef unsigned wchar_t    WCHAR;
 typedef long                LONG;
 typedef unsigned long       ULONG;
-typedef signed int          DWORD;
+typedef unsigned int          DWORD;
 typedef int                 BOOL;
 typedef unsigned char                BYTE;
 typedef BYTE *              PBYTE;

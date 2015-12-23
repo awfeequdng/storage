@@ -7,6 +7,7 @@ CIni::CIni()
 
 }
 
+
 int CIni::SetPathName(std::string fileName)
 {
     if(!m_configFileName.empty())

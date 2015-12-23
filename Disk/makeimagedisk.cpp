@@ -5,11 +5,16 @@
 #include<fcntl.h>
 
 #include <thread>
-
+#include "common/PrintMacros.h"
 //#define HIDE_SECTORS  0x800   // 1M
 //#define COMPRESS_THREAD_COUNT 3
 //extern BOOL g_bFilecopyType;
-
+#include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/hdreg.h>
+#include <linux/fs.h>
 
 
 MakeImageDisk::MakeImageDisk()
@@ -29,7 +34,7 @@ MakeImageDisk::MakeImageDisk()
 
     m_bReadDiskOver = FALSE;
 
-    m_strDiskPath = "/dev/nvme0n1";
+    m_strDiskPath = "/dev/sdb";
     m_strImagePath = "/home/caipengxiang/image";
 
     m_hDisk = open(m_strDiskPath.c_str(),O_RDONLY);
@@ -37,12 +42,15 @@ MakeImageDisk::MakeImageDisk()
 
     if(m_hDisk <0)
     {
-        std::cerr<<"open disk "<<m_strDiskPath<<" error!"<<std::endl;
+//        DEBUG("open disk "<<m_strDiskPath<<" error!"<<endl);
+        ERROR("Open disk error!");
+//        std::cerr<<"open disk "<<m_strDiskPath<<" error!"<<std::endl;
     }
     if(m_hImage <0)
     {
         std::cerr<<"open image file "<<m_strImagePath<<" error!"<<std::endl;
     }
+    m_ullSectorNums =  Disk::GetNumberOfSectors(m_hDisk,&m_dwBytesPerSector,NULL);
 }
 
 MakeImageDisk::MakeImageDisk(CString filePath, CString imagePath)
@@ -80,6 +88,17 @@ BOOL MakeImageDisk::make()
     {
         std::cout<<"analyze file system failed!"<<std::endl;
     }
+
+    pthread_t pthReadDisk;
+    pthread_t pthWriteImage;
+    pthread_create(&pthReadDisk,NULL,ReadDiskThreadProc,this);
+    Sleep(100);
+    pthread_create(&pthWriteImage,NULL,WriteImageThreadProc,this);
+
+    pthread_join(pthReadDisk,NULL);
+    pthread_join(pthWriteImage,NULL);
+
+
 //    Sleep(5000);
 
 //    std::thread readDiskThd(ReadDiskThreadProc,this);
@@ -90,7 +109,7 @@ BOOL MakeImageDisk::make()
 //    writeImageThd.join();
 //    std::cout<<"write image thread finished!"<<std::endl;
 
-    return FALSE;
+    return TRUE;
 }
 CString MakeImageDisk::strImagePath() const
 {
@@ -352,7 +371,7 @@ BOOL MakeImageDisk::ReadDisk()
             if (!ReadSectors(m_hDisk,ullStartSectors,dwSectors,effData.wBytesPerSector,pByte,&dwErrorCode))
             {
                 bResult = FALSE;
-
+                DEBUG("ReadSecotrs error !");
 //                CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Port %s,Disk %d,Speed=%.2f,system errorcode=%ld,%s")
 //                    ,m_MasterPort->GetPortName(),m_MasterPort->GetDiskNum(),m_MasterPort->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
                 break;
@@ -446,24 +465,24 @@ BOOL MakeImageDisk::ReadImage()
     }
 }
 
-void MakeImageDisk::ReadDiskThreadProc(LPVOID *param)
+void *MakeImageDisk::ReadDiskThreadProc(LPVOID param)
 {
     MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
     Sleep(1000);
     pMakeImage->ReadDisk();
 }
 
-void MakeImageDisk::ReadImageThreadProc(LPVOID *param)
+void *MakeImageDisk::ReadImageThreadProc(LPVOID param)
 {
 
 }
 
-void MakeImageDisk::WriteDiskThreadProc(LPVOID *param)
+void *MakeImageDisk::WriteDiskThreadProc(LPVOID param)
 {
 
 }
 
-void MakeImageDisk::WriteImageThreadProc(LPVOID *param)
+void *MakeImageDisk::WriteImageThreadProc(LPVOID param)
 {
     MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
     Sleep(1000);
@@ -590,6 +609,7 @@ BOOL MakeImageDisk::ReadLocalImage()
 
     return bResult;
 }
+
 
 BOOL MakeImageDisk::ReadRemoteImage()
 {
@@ -976,7 +996,7 @@ BOOL MakeImageDisk::WriteLocalImage()
 
     CDataQueue *pDataQueue = &m_DataQueue;
 
-    if (m_hImage)
+    if (m_hImage <0 )
     {
         std::cerr<<"image handle is failed! "<<endl;
 //        CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Create image file error,filename=%s,system errorcode=%ld,%s")
@@ -1051,7 +1071,7 @@ BOOL MakeImageDisk::WriteLocalImage()
 
 
         imgHead.dwMaxSizeOfPackage = MAX_COMPRESS_BUF;
-        imgHead.ullCapacitySize = 0xffffffffffffffff;
+        imgHead.ullCapacitySize = m_ullSectorNums*m_dwBytesPerSector;
         imgHead.dwBytesPerSector = m_dwBytesPerSector;
         memcpy(imgHead.szZipVer,ZIP_VERSION,strlen(ZIP_VERSION));
         imgHead.byUnCompress = m_bDataCompress ? 0 : 1;
@@ -1067,7 +1087,7 @@ BOOL MakeImageDisk::WriteLocalImage()
         if (!WriteFileAsyn(m_hImage,0,dwLen,(LPBYTE)&imgHead,&dwErrorCode))
         {
             bResult = FALSE;
-
+            DEBUG("Write File Error!");
 //            CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Write image head error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
 //                ,port->GetFileName(),port->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
         }
