@@ -16,7 +16,7 @@
 #include <linux/hdreg.h>
 #include <linux/fs.h>
 
-
+#include <assert.h>
 MakeImageDisk::MakeImageDisk()
 {
 
@@ -33,12 +33,35 @@ MakeImageDisk::MakeImageDisk()
     m_bCompressComplete = FALSE;
 
     m_bReadDiskOver = FALSE;
+    m_bReadImageOver = FALSE;
 
-    m_strDiskPath = "/dev/sdb";
+    m_strDiskPath = "/dev/nvme0n1";
     m_strImagePath = "/home/caipengxiang/image";
 
-    m_hDisk = open(m_strDiskPath.c_str(),O_RDONLY);
-    m_hImage = open(m_strImagePath.c_str(),O_RDWR);
+//    if(!access(m_strDiskPath.c_str(),F_OK))
+//    {
+
+////        m_hDisk  = open(m_strDiskPath.c_str(),O_RDONLY)
+//    }
+//    else
+//    {
+
+//    }
+
+    m_hDisk = open(m_strDiskPath.c_str(),O_RDWR);
+    if(-1 == access(m_strImagePath.c_str(),F_OK))
+    {
+        m_hImage = open(m_strImagePath.c_str(),O_RDWR|O_CREAT|O_TRUNC,S_IRWXO|S_IRWXU|S_IRWXG);
+        if(m_hImage <0 )
+        {
+            DEBUG(strerror(errno));
+        }
+    }
+    else
+    {
+        m_hImage = open(m_strImagePath.c_str(),O_RDWR);
+    }
+
 
     if(m_hDisk <0)
     {
@@ -77,6 +100,8 @@ BOOL MakeImageDisk::make()
 
     BYTE pByte[512] ;
     DWORD readLen;
+    assert(m_hDisk >=0 );
+    assert(m_hImage >=0 );
     ReadFile(m_hDisk,pByte,512,readLen,0);
 
 
@@ -89,25 +114,23 @@ BOOL MakeImageDisk::make()
         std::cout<<"analyze file system failed!"<<std::endl;
     }
 
-    pthread_t pthReadDisk;
-    pthread_t pthWriteImage;
-    pthread_create(&pthReadDisk,NULL,ReadDiskThreadProc,this);
-    Sleep(100);
-    pthread_create(&pthWriteImage,NULL,WriteImageThreadProc,this);
+//    pthread_t pthReadDisk;
+//    pthread_t pthWriteImage;
+//    pthread_create(&pthReadDisk,NULL,ReadDiskThreadProc,this);
+//    Sleep(100);
+//    pthread_create(&pthWriteImage,NULL,WriteImageThreadProc,this);
 
-    pthread_join(pthReadDisk,NULL);
-    pthread_join(pthWriteImage,NULL);
+//    pthread_join(pthReadDisk,NULL);
+//    pthread_join(pthWriteImage,NULL);
 
 
-//    Sleep(5000);
+    pthread_t pthReadImage;
+    pthread_t pthWriteDisk;
+    pthread_create(&pthReadImage,NULL,ReadImageThreadProc,this);
+    pthread_create(&pthWriteDisk,NULL,WriteDiskThreadProc,this);
+    pthread_join(pthWriteDisk,NULL);
+    pthread_join(pthReadImage,NULL);
 
-//    std::thread readDiskThd(ReadDiskThreadProc,this);
-//    std::thread writeImageThd(WriteImageThreadProc,this);
-
-//    readDiskThd.join();
-//    std::cout<<"read disk thread finished!"<<std::endl;
-//    writeImageThd.join();
-//    std::cout<<"write image thread finished!"<<std::endl;
 
     return TRUE;
 }
@@ -234,9 +257,8 @@ BOOL MakeImageDisk::WriteSectors(HANDLE hDevice, ULONGLONG ullStartSector, DWORD
     DWORD dwWriteLen = 0;
     DWORD dwErrorCode = 0;
 
-    if (!WriteFile(hDevice,lpSectBuff,dwLen,dwWriteLen,ullOffset))
+    if (!WriteFileAsyn(hDevice,ullOffset,dwLen,lpSectBuff,&dwErrorCode))
     {
-
         return FALSE;
     }
     else
@@ -269,46 +291,45 @@ BOOL MakeImageDisk::WriteFile(HANDLE hDevice, LPBYTE lpSectBuff, DWORD dwLen, DW
 
 BOOL MakeImageDisk::ReadFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYTE lpBuffer, PDWORD pdwErrorCode, DWORD dwTimeOut)
 {
-    int n;
-    if((n = pread(hFile,lpBuffer,dwSize,ullOffset))>0)
+    DWORD dwReadSize = 0;
+    if(!ReadFile(hFile,lpBuffer,dwSize,dwReadSize,ullOffset))
     {
-        dwSize = n;
-        return TRUE;
+        return FALSE;
     }
     else
     {
-       if(n<0)
-       {
+        if(dwReadSize != dwSize)
+        {
+            dwSize = dwReadSize;
             return FALSE;
-       }
-       else
-       {
-            dwSize = n;
-            return TRUE;
-       }
+        }
+        else
+        {
+            dwSize = dwReadSize;
+        }
     }
 }
 
 BOOL MakeImageDisk::WriteFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYTE lpBuffer, PDWORD pdwErrorCode, DWORD dwTimeOut)
 {
-    long n;
-    if((n = pwrite(hFile,lpBuffer,dwSize,ullOffset))>0)
+    DWORD dwWriteSize = 0;
+    if(!WriteFile(hFile,lpBuffer,dwSize,dwWriteSize,ullOffset))
     {
-        dwSize = n;
-        return TRUE;
+        return FALSE;
     }
     else
     {
-       if(n<0)
-       {
+        if(dwWriteSize != dwSize)
+        {
+            dwSize = dwWriteSize;
             return FALSE;
-       }
-       else
-       {
-            dwSize = n;
-            return TRUE;
-       }
+        }
+        else
+        {
+            dwSize = dwWriteSize;
+        }
     }
+
 }
 
 
@@ -437,11 +458,11 @@ BOOL MakeImageDisk::ReadDisk()
     if (bResult)
     {
 //        m_MasterPort->SetPortState(PortState_Stop);
-        std::cerr<<"read over!"<<endl;
+        DEBUG("read over!");
     }
     else
     {
-        std::cerr<<"read failed!"<<endl;
+        DEBUG("read failed!");
     }
 
     // 所有数据都拷贝完
@@ -474,12 +495,16 @@ void *MakeImageDisk::ReadDiskThreadProc(LPVOID param)
 
 void *MakeImageDisk::ReadImageThreadProc(LPVOID param)
 {
-
+    MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
+    Sleep(1000);
+    pMakeImage->ReadImage();
 }
 
 void *MakeImageDisk::WriteDiskThreadProc(LPVOID param)
 {
-
+    MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
+    Sleep(1000);
+    pMakeImage->WriteDisk();
 }
 
 void *MakeImageDisk::WriteImageThreadProc(LPVOID param)
@@ -505,7 +530,7 @@ BOOL MakeImageDisk::ReadLocalImage()
     double dbTimeNoWait = 0.0,dbTimeWait = 0.0;
 
 //    QueryPerformanceFrequency(&freq);
-
+    m_bReadImageOver = FALSE;
     while (bResult && ullReadSize < m_ullImageSize)
     {
 //        QueryPerformanceCounter(&t0);
@@ -523,7 +548,7 @@ BOOL MakeImageDisk::ReadLocalImage()
         if (!ReadFileAsyn(m_hImage,ullOffset,dwLen,pkgHead,&dwErrorCode))
         {
             bResult = FALSE;
-
+            DEBUG("Read File error!");
 //            CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Read image file error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
 //                ,m_MasterPort->GetFileName(),m_MasterPort->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
             break;
@@ -537,6 +562,7 @@ BOOL MakeImageDisk::ReadLocalImage()
         if (!ReadFileAsyn(m_hImage,ullOffset,dwLen,pByte,&dwErrorCode))
         {
             bResult = FALSE;
+            DEBUG("Read File error!");
             delete []pByte;
 
 //            CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Read image file error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
@@ -595,16 +621,84 @@ BOOL MakeImageDisk::ReadLocalImage()
 
     }
 
-
+    m_bReadImageOver = TRUE;
     // 先设置为停止状态
     if (bResult)
     {
 //        m_MasterPort->SetPortState(PortState_Stop);
-        std::cerr<<"read image successful !"<<endl;
+        DEBUG("read image successful !");
     }
     else
     {
-        std::cerr<<"read image failed !"<<endl;
+        DEBUG("read image failed !");
+    }
+
+    return bResult;
+}
+
+BOOL MakeImageDisk::WriteDisk()
+{
+    BOOL bResult = TRUE;
+    DWORD dwErrorCode = 0;
+    ErrorType errType = ErrorType_System;
+
+
+
+    DWORD dwBytesPerSector = m_dwBytesPerSector;
+
+    CDataQueue *pDataQueue = &m_DataQueue;
+
+//	BOOL bWriteLog = TRUE;
+
+    while (!m_bReadImageOver || pDataQueue->GetCount() > 0)
+    {
+
+        while(pDataQueue->GetCount() <= 0)
+        {
+            //SwitchToThread();
+            Sleep(5);
+        }
+
+
+        PDATA_INFO dataInfo = pDataQueue->GetHeadRemove();
+
+        if (dataInfo == NULL)
+        {
+            continue;
+        }
+
+
+        ULONGLONG ullStartSectors = dataInfo->ullOffset / dwBytesPerSector;
+        DWORD dwSectors = dataInfo->dwDataSize / dwBytesPerSector;
+
+
+        if (!WriteSectors(m_hDisk,ullStartSectors,dwSectors,dwBytesPerSector,dataInfo->pData,&dwErrorCode))
+        {
+            DEBUG("WriteSectors error!");
+            bResult = FALSE;
+            delete []dataInfo->pData;
+            delete dataInfo;
+
+            break;
+        }
+        else
+        {
+
+            delete []dataInfo->pData;
+            delete dataInfo;
+
+        }
+
+    }
+
+
+    if (bResult)
+    {
+        DEBUG("write disk pass!");
+    }
+    else
+    {
+        DEBUG("write disk failed!");
     }
 
     return bResult;
@@ -998,7 +1092,7 @@ BOOL MakeImageDisk::WriteLocalImage()
 
     if (m_hImage <0 )
     {
-        std::cerr<<"image handle is failed! "<<endl;
+        DEBUG("image handle is failed! ");
 //        CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Create image file error,filename=%s,system errorcode=%ld,%s")
 //            ,port->GetFileName(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
 
@@ -1009,7 +1103,7 @@ BOOL MakeImageDisk::WriteLocalImage()
     double dbTimeNoWait = 0.0,dbTimeWait = 0.0;
 
 
-    while (!m_bReadDiskOver)
+    while (!m_bReadDiskOver||pDataQueue->GetCount()>0)
     {
 //        QueryPerformanceCounter(&t0);
         while(pDataQueue->GetCount() <=0 )
@@ -1038,7 +1132,7 @@ BOOL MakeImageDisk::WriteLocalImage()
         if (!WriteFileAsyn(m_hImage,ullOffset,dwLen,dataInfo->pData,&dwErrorCode))
         {
             bResult = FALSE;
-
+            DEBUG("Write file error!");
             delete []dataInfo->pData;
             delete dataInfo;
 
@@ -1066,7 +1160,7 @@ BOOL MakeImageDisk::WriteLocalImage()
         imgHead.ullImageSize = ullSize;
         memcpy(imgHead.szAppVersion,APP_VERSION,strlen(APP_VERSION));
 
-
+        m_ullImageSize = ullSize;
         imgHead.dwImageType = QUICK_IMAGE;
 
 
@@ -1092,7 +1186,15 @@ BOOL MakeImageDisk::WriteLocalImage()
 //                ,port->GetFileName(),port->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
         }
     }
-
+    if (bResult)
+    {
+//        m_MasterPort->SetPortState(PortState_Stop);
+        DEBUG("write over!");
+    }
+    else
+    {
+        DEBUG("write failed!");
+    }
     return bResult;
 }
 

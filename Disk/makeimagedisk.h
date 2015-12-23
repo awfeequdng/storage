@@ -37,7 +37,7 @@ protected:
     BOOL IsReachLimitQty(int limit);
     BOOL ReadRemoteImage();
     BOOL ReadLocalImage();
-    BOOL WriteDisk(CString strDskPath, CDataQueue *pDataQueue);
+    BOOL WriteDisk();
 private:
 
     BOOL ReadSectors(HANDLE hDevice,
@@ -106,6 +106,7 @@ private:
 
     BOOL m_bCompressComplete;
     BOOL m_bReadDiskOver;
+    BOOL m_bReadImageOver;
 
     BOOL    m_bDataCompress;
     BOOL    m_bServerFirst;
@@ -115,6 +116,7 @@ private:
     BOOL WriteImage();
     BOOL WriteLocalImage();
     BOOL WriteRemoteImage();
+
     BOOL GetFileSize(int fd,ULONGLONG &ullSize);
     BootSector GetBootSectorType(const PBYTE pXBR);
     ULONGLONG ReadOffset(const PBYTE pByte, DWORD offset, BYTE bytes);

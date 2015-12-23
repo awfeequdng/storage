@@ -18,6 +18,7 @@ GcfgMainWindow::GcfgMainWindow()
 void GcfgMainWindow::initial()
 {
 //    m_selectPattern = (SelectPattern)m_setting.value(Setting_SelectPattern,GLOBAL_DUP).toUInt();
+    m_workMode = WorkMode_ImageMake;
 }
 
 WorkMode GcfgMainWindow::workMode() const
