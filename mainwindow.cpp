@@ -70,8 +70,8 @@ void MainWindow::slotGlobalParamSettingChange()
 
 void MainWindow::on_btnSystemFunc_clicked()
 {
-//    p_SystemFuncDlg->show();
-//    p_SystemFuncDlg->exec();
+    //    p_SystemFuncDlg->show();
+    //    p_SystemFuncDlg->exec();
     SystemFuncDlg systemFuncDlg;
     systemFuncDlg.exec();
 
@@ -143,6 +143,7 @@ void MainWindow::on_btnLockScreen_clicked()
 
 void MainWindow::on_btnStart_clicked()
 {
+    DEBUG("work mode = "<<g_pGcfgMainWindow->workMode());
     switch(g_pGcfgMainWindow->workMode())
     {
     case WorkMode_ImageMake:
@@ -151,7 +152,12 @@ void MainWindow::on_btnStart_clicked()
         mkImageThd.detach();
         break;
     }
-//        case WorkMode_
+    case WorkMode_ImageCopy:
+    {
+        std::thread cpImageThd(copyImageThread);
+        cpImageThd.detach();
+        break;
+    }
     default:
         break;
     }
@@ -179,7 +185,7 @@ void MainWindow::initial()
     m_nMachineType = MT_NGFF;
     m_bEnableButton = TRUE;
     m_bFileCopyFlag = FALSE;
-//    m_pFilecopySet = NULL;
+    //    m_pFilecopySet = NULL;
     m_bMasterExit = FALSE;
     m_bAuthorize = FALSE;
     m_pSinglePort = NULL;
@@ -191,7 +197,7 @@ void MainWindow::initial()
 
 
 
-//    initialConfig();
+    //    initialConfig();
     slotGlobalParamSettingChange();
 
 }
@@ -457,7 +463,13 @@ void MainWindow::release()
 void *MainWindow::makeImageThread()
 {
     MakeImageDisk makeDiskImage;
-    makeDiskImage.make();
+    makeDiskImage.OnMakeImage();
+}
+
+void *MainWindow::copyImageThread()
+{
+    MakeImageDisk makeDiskImage;
+    makeDiskImage.OnCopyImage();
 }
 
 //void MainWindow::InitialPortFrame()

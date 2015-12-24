@@ -11,7 +11,8 @@ class MakeImageDisk
 public:
     MakeImageDisk();
     MakeImageDisk(CString filePath,CString imagePath);
-    BOOL make();
+    BOOL OnMakeImage();
+    BOOL OnCopyImage();
 
     CString strImagePath() const;
     void setStrImagePath(const CString &strImagePath);
@@ -96,6 +97,7 @@ private:
     ULONGLONG m_ullSectorNums;
     ULONGLONG m_ullImageSize;
     ULONGLONG m_ullValidSize;
+    ULONGLONG m_ullCapacity;
 
     BOOL m_bMustSameCapacity;
     BOOL m_bAllowCapGap;
@@ -116,6 +118,7 @@ private:
     BOOL WriteImage();
     BOOL WriteLocalImage();
     BOOL WriteRemoteImage();
+
 
     BOOL GetFileSize(int fd,ULONGLONG &ullSize);
     BootSector GetBootSectorType(const PBYTE pXBR);

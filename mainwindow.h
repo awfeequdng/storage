@@ -80,6 +80,7 @@ private:
     void release();
 
     static void *makeImageThread();
+    static void *copyImageThread();
 
 private:
     Ui::MainWindow *ui;
@@ -209,6 +210,7 @@ private:
 
     BOOL IsLisence();
     void CleanRecord();
+
 
 };
 

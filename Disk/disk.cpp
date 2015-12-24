@@ -27,7 +27,7 @@ HANDLE Disk::GetHandleOnPhysicalDrive(CString strDiskPath, DWORD dwFlagsAndAttri
     HANDLE hDisk ;
     if(dwFlagsAndAttributes & O_CREAT)
     {
-        mode_t mode = 0666;
+        mode_t mode = S_IRUSR|S_IWUSR|S_IROTH|S_IWOTH;
         hDisk = open(strDiskPath.c_str(),dwFlagsAndAttributes,mode);
     }
     else
@@ -52,7 +52,7 @@ HANDLE Disk::GetHandleOnVolume(CString letter, DWORD dwFlagsAndAttributes, PDWOR
     HANDLE hDisk ;
     if(dwFlagsAndAttributes & O_CREAT)
     {
-        mode_t mode = 0666;
+        mode_t mode = S_IRUSR|S_IWUSR|S_IROTH|S_IWOTH;
         hDisk = open(letter.c_str(),dwFlagsAndAttributes,mode);
     }
     else
@@ -72,7 +72,7 @@ HANDLE Disk::GetHandleOnFile(CString strFileName,  DWORD dwFlagsAndAttributes, P
     HANDLE hFile ;
     if(dwFlagsAndAttributes & O_CREAT)
     {
-        mode_t mode = 0666;
+        mode_t mode = S_IRUSR|S_IWUSR|S_IROTH|S_IWOTH|S_IRGRP|S_IWGRP;
         hFile = open(strFileName.c_str(),dwFlagsAndAttributes,mode);
     }
     else
@@ -685,6 +685,7 @@ BOOL Disk::ReadFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYTE
         else
         {
             dwSize = dwReadSize;
+            return TRUE;
         }
     }
 }
@@ -724,6 +725,7 @@ BOOL Disk::WriteFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYT
         else
         {
             dwSize = dwWriteSize;
+            return TRUE;
         }
     }
 }
@@ -2903,7 +2905,6 @@ BOOL Disk::OnCopyDisk()
 
                     m_pMasterPort->SetErrorCode(errType,dwErrorCode);
                 }
-
             }
 
         }

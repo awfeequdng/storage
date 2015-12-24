@@ -35,18 +35,10 @@ MakeImageDisk::MakeImageDisk()
     m_bReadDiskOver = FALSE;
     m_bReadImageOver = FALSE;
 
-    m_strDiskPath = "/dev/nvme0n1";
-    m_strImagePath = "/home/caipengxiang/image";
+    m_strDiskPath = "/dev/nvme0n1p1";
+//    m_strDiskPath = "/home/caipengxiang/nvme0n1";
+    m_strImagePath = "/home/caipengxiang/user/image";
 
-//    if(!access(m_strDiskPath.c_str(),F_OK))
-//    {
-
-////        m_hDisk  = open(m_strDiskPath.c_str(),O_RDONLY)
-//    }
-//    else
-//    {
-
-//    }
 
     m_hDisk = open(m_strDiskPath.c_str(),O_RDWR);
     if(-1 == access(m_strImagePath.c_str(),F_OK))
@@ -93,7 +85,7 @@ MakeImageDisk::MakeImageDisk(CString filePath, CString imagePath)
      }
 }
 
-BOOL MakeImageDisk::make()
+BOOL MakeImageDisk::OnMakeImage()
 {
 //    std::thread tdReadDisk()
     std::cout<<"Make Disk Image !"<<endl;
@@ -114,22 +106,21 @@ BOOL MakeImageDisk::make()
         std::cout<<"analyze file system failed!"<<std::endl;
     }
 
-//    pthread_t pthReadDisk;
-//    pthread_t pthWriteImage;
-//    pthread_create(&pthReadDisk,NULL,ReadDiskThreadProc,this);
-//    Sleep(100);
-//    pthread_create(&pthWriteImage,NULL,WriteImageThreadProc,this);
+    pthread_t pthReadDisk;
+    pthread_t pthWriteImage;
+    pthread_create(&pthReadDisk,NULL,ReadDiskThreadProc,this);
+    Sleep(100);
+    pthread_create(&pthWriteImage,NULL,WriteImageThreadProc,this);
+    pthread_join(pthReadDisk,NULL);
+    pthread_join(pthWriteImage,NULL);
 
-//    pthread_join(pthReadDisk,NULL);
-//    pthread_join(pthWriteImage,NULL);
 
-
-    pthread_t pthReadImage;
-    pthread_t pthWriteDisk;
-    pthread_create(&pthReadImage,NULL,ReadImageThreadProc,this);
-    pthread_create(&pthWriteDisk,NULL,WriteDiskThreadProc,this);
-    pthread_join(pthWriteDisk,NULL);
-    pthread_join(pthReadImage,NULL);
+//    pthread_t pthReadImage;
+//    pthread_t pthWriteDisk;
+//    pthread_create(&pthReadImage,NULL,ReadImageThreadProc,this);
+//    pthread_create(&pthWriteDisk,NULL,WriteDiskThreadProc,this);
+//    pthread_join(pthWriteDisk,NULL);
+//    pthread_join(pthReadImage,NULL);
 
 
     return TRUE;
@@ -179,7 +170,7 @@ BOOL MakeImageDisk::IsReachLimitQty(int limit)
 {
     bool bReached = false;
 
-    if(m_DataQueue.GetCount() > limit)
+    if(m_DataQueue.GetCount() >= limit)
     {
         bReached = TRUE;
     }
@@ -191,17 +182,10 @@ BOOL MakeImageDisk::ReadSectors(HANDLE hDevice, ULONGLONG ullStartSector, DWORD 
 {
     ULONGLONG ullOffset = ullStartSector * dwBytesPerSector;
     DWORD dwLen = dwSectors * dwBytesPerSector;
-    DWORD dwReadLen = 0;
     DWORD dwErrorCode = 0;
 
-    if (!ReadFile(hDevice,lpSectBuff,dwLen,dwReadLen,ullOffset))
-    {
-        return FALSE;
-    }
-    else
-    {
-        return TRUE;
-    }
+    return ReadFileAsyn(hDevice,ullOffset,dwLen,lpSectBuff,&dwErrorCode);
+
 }
 #include <errno.h>
 BOOL MakeImageDisk::ReadFile(HANDLE hDevice, LPBYTE lpSectBuff, DWORD dwLen, DWORD &dwReadLen, ULONGLONG offset)
@@ -256,15 +240,7 @@ BOOL MakeImageDisk::WriteSectors(HANDLE hDevice, ULONGLONG ullStartSector, DWORD
     DWORD dwLen = dwSectors * dwBytesPerSector;
     DWORD dwWriteLen = 0;
     DWORD dwErrorCode = 0;
-
-    if (!WriteFileAsyn(hDevice,ullOffset,dwLen,lpSectBuff,&dwErrorCode))
-    {
-        return FALSE;
-    }
-    else
-    {
-        return TRUE;
-    }
+    return WriteFileAsyn(hDevice,ullOffset,dwLen,lpSectBuff,&dwErrorCode);
 }
 
 BOOL MakeImageDisk::WriteFile(HANDLE hDevice, LPBYTE lpSectBuff, DWORD dwLen, DWORD &dwWriteLen, ULONGLONG offset)
@@ -306,6 +282,7 @@ BOOL MakeImageDisk::ReadFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSiz
         else
         {
             dwSize = dwReadSize;
+            return TRUE;
         }
     }
 }
@@ -327,6 +304,7 @@ BOOL MakeImageDisk::WriteFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSi
         else
         {
             dwSize = dwWriteSize;
+            return TRUE;
         }
     }
 
@@ -364,6 +342,8 @@ BOOL MakeImageDisk::ReadDisk()
         dwSectors = m_nBlockSectors;
         dwLen = m_nBlockSectors * m_dwBytesPerSector;
 
+        DEBUG("ullStartSector = "<<ullStartSectors);
+        DEBUG("m_ullSectorNums = "<<m_ullSectorNums);
         while (bResult && ullReadSectors < effData.ullSectors && ullStartSectors < m_ullSectorNums)
         {
             // 判断队列是否达到限制值
@@ -408,44 +388,30 @@ BOOL MakeImageDisk::ReadDisk()
                 dataInfo->pData = new BYTE[dwLen];
                 memcpy(dataInfo->pData,pByte,dwLen);
 
-                if (m_bDataCompress)
-                {
-                    m_CompressQueue.AddTail(dataInfo);
-                }
-                else
-                {
-                    // 不压缩，加上文件头和文件尾
-                    PDATA_INFO compressData = new DATA_INFO;
-                    ZeroMemory(compressData,sizeof(DATA_INFO));
+                // 不压缩，加上文件头和文件尾
+                PDATA_INFO compressData = new DATA_INFO;
+                ZeroMemory(compressData,sizeof(DATA_INFO));
 
-                    compressData->dwDataSize = dataInfo->dwDataSize + sizeof(ULONGLONG) + sizeof(DWORD) + 1;
-                    compressData->dwOldSize = dataInfo->dwDataSize;
-                    compressData->pData = new BYTE[compressData->dwDataSize];
-                    ZeroMemory(compressData->pData,compressData->dwDataSize);
+                compressData->dwDataSize = dataInfo->dwDataSize + sizeof(ULONGLONG) + sizeof(DWORD) + 1;
+                compressData->dwOldSize = dataInfo->dwDataSize;
+                compressData->pData = new BYTE[compressData->dwDataSize];
+                ZeroMemory(compressData->pData,compressData->dwDataSize);
 
-                    compressData->pData[compressData->dwDataSize - 1] = 0xED; //结束标志
+                compressData->pData[compressData->dwDataSize - 1] = 0xED; //结束标志
 
-                    memcpy(compressData->pData,&dataInfo->ullOffset,sizeof(ULONGLONG));
-                    memcpy(compressData->pData + sizeof(ULONGLONG),&compressData->dwDataSize,sizeof(DWORD));
-                    memcpy(compressData->pData + sizeof(ULONGLONG) + sizeof(DWORD),pByte,dwLen);
+                memcpy(compressData->pData,&dataInfo->ullOffset,sizeof(ULONGLONG));
+                memcpy(compressData->pData + sizeof(ULONGLONG),&compressData->dwDataSize,sizeof(DWORD));
+                memcpy(compressData->pData + sizeof(ULONGLONG) + sizeof(DWORD),pByte,dwLen);
 
-                    m_DataQueue.AddTail(compressData);
+                m_DataQueue.AddTail(compressData);
 
-                    delete []dataInfo->pData;
-                    delete dataInfo;
-                }
+                delete []dataInfo->pData;
+                delete dataInfo;
+
 
                 ullStartSectors += dwSectors;
                 ullReadSectors += dwSectors;
 
-//                QueryPerformanceCounter(&t3);
-
-//                dbTimeNoWait = (double)(t2.QuadPart - t1.QuadPart) / (double)freq.QuadPart; // 秒
-//                dbTimeWait = (double)(t3.QuadPart - t0.QuadPart) / (double)freq.QuadPart; // 秒
-
-//                m_MasterPort->AppendUsedWaitTimeS(dbTimeWait);
-//                m_MasterPort->AppendUsedNoWaitTimeS(dbTimeNoWait);
-//                m_MasterPort->AppendCompleteSize(dwLen);
             }
         }
     }
@@ -476,41 +442,30 @@ BOOL MakeImageDisk::ReadDisk()
 
 BOOL MakeImageDisk::ReadImage()
 {
-    if (m_bServerFirst)
-    {
-        return ReadRemoteImage();
-    }
-    else
-    {
-        return ReadLocalImage();
-    }
+    return ReadLocalImage();
 }
 
 void *MakeImageDisk::ReadDiskThreadProc(LPVOID param)
 {
     MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
-    Sleep(1000);
     pMakeImage->ReadDisk();
 }
 
 void *MakeImageDisk::ReadImageThreadProc(LPVOID param)
 {
     MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
-    Sleep(1000);
     pMakeImage->ReadImage();
 }
 
 void *MakeImageDisk::WriteDiskThreadProc(LPVOID param)
 {
     MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
-    Sleep(1000);
     pMakeImage->WriteDisk();
 }
 
 void *MakeImageDisk::WriteImageThreadProc(LPVOID param)
 {
     MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
-    Sleep(1000);
     pMakeImage->WriteImage();
 }
 
@@ -531,10 +486,12 @@ BOOL MakeImageDisk::ReadLocalImage()
 
 //    QueryPerformanceFrequency(&freq);
     m_bReadImageOver = FALSE;
+
+    DEBUG("Image Size = "<<m_ullImageSize);
     while (bResult && ullReadSize < m_ullImageSize)
     {
 //        QueryPerformanceCounter(&t0);
-
+        DEBUG("ullReadSize = "<<ullReadSize);
         // 判断队列是否达到限制值
         while (IsReachLimitQty(MAX_LENGTH_OF_DATA_QUEUE))
         {
@@ -543,12 +500,14 @@ BOOL MakeImageDisk::ReadLocalImage()
 
 //        QueryPerformanceCounter(&t1);
 
-        BYTE pkgHead[PKG_HEADER_SIZE] = {NULL};
+        BYTE pkgHead[PKG_HEADER_SIZE] ;
+        ZeroMemory(pkgHead,PKG_HEADER_SIZE);
         dwLen = PKG_HEADER_SIZE;
+
         if (!ReadFileAsyn(m_hImage,ullOffset,dwLen,pkgHead,&dwErrorCode))
         {
             bResult = FALSE;
-            DEBUG("Read File error!");
+            ERROR("Read File error!");
 //            CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Read image file error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
 //                ,m_MasterPort->GetFileName(),m_MasterPort->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
             break;
@@ -588,36 +547,20 @@ BOOL MakeImageDisk::ReadLocalImage()
         dataInfo->pData = new BYTE[dataInfo->dwDataSize];
         memcpy(dataInfo->pData,&pByte[PKG_HEADER_SIZE],dataInfo->dwDataSize);
 
-        if (m_bDataCompress)
-        {
-            m_CompressQueue.AddTail(dataInfo);
-        }
-        else
-        {
-            m_DataQueue.AddTail(dataInfo);
+        m_DataQueue.AddTail(dataInfo);
 
-            EFF_DATA effData;
-            effData.ullStartSector = dataInfo->ullOffset/BYTES_PER_SECTOR;
-            effData.ullSectors = dataInfo->dwDataSize/BYTES_PER_SECTOR;
-            effData.wBytesPerSector = BYTES_PER_SECTOR;
-            m_EffList.push_back(effData);
+        EFF_DATA effData;
+        effData.ullStartSector = dataInfo->ullOffset/BYTES_PER_SECTOR;
+        effData.ullSectors = dataInfo->dwDataSize/BYTES_PER_SECTOR;
+        effData.wBytesPerSector = BYTES_PER_SECTOR;
+        m_EffList.push_back(effData);
 
-//            m_pMasterHashMethod->update(dataInfo->pData,dataInfo->dwDataSize);
-        }
 
         delete []pByte;
 
         ullOffset += dwLen;
         ullReadSize += dwLen;
 
-//        QueryPerformanceCounter(&t3);
-//        dbTimeNoWait = (double)(t2.QuadPart - t1.QuadPart) / (double)freq.QuadPart; // 秒
-//        dbTimeWait = (double)(t3.QuadPart - t0.QuadPart) / (double)freq.QuadPart; // 秒
-//        m_MasterPort->AppendUsedWaitTimeS(dbTimeWait);
-//        m_MasterPort->AppendUsedNoWaitTimeS(dbTimeNoWait);
-
-        // 因为是压缩数据，长度比实际长度短，所以要根据速度计算
-//        m_MasterPort->SetCompleteSize(m_MasterPort->GetValidSize() * ullReadSize / m_ullImageSize);
 
     }
 
@@ -643,9 +586,7 @@ BOOL MakeImageDisk::WriteDisk()
     ErrorType errType = ErrorType_System;
 
 
-
     DWORD dwBytesPerSector = m_dwBytesPerSector;
-
     CDataQueue *pDataQueue = &m_DataQueue;
 
 //	BOOL bWriteLog = TRUE;
@@ -653,17 +594,19 @@ BOOL MakeImageDisk::WriteDisk()
     while (!m_bReadImageOver || pDataQueue->GetCount() > 0)
     {
 
-        while(pDataQueue->GetCount() <= 0)
-        {
-            //SwitchToThread();
-            Sleep(5);
-        }
+        DEBUG("pDataQueue->GetCount() == "<<pDataQueue->GetCount());
+//        while(pDataQueue->GetCount() <= 0)
+//        {
+//            //SwitchToThread();
+//            Sleep(5);
+//        }
 
 
         PDATA_INFO dataInfo = pDataQueue->GetHeadRemove();
 
         if (dataInfo == NULL)
         {
+            Sleep(5);
             continue;
         }
 
@@ -671,6 +614,7 @@ BOOL MakeImageDisk::WriteDisk()
         ULONGLONG ullStartSectors = dataInfo->ullOffset / dwBytesPerSector;
         DWORD dwSectors = dataInfo->dwDataSize / dwBytesPerSector;
 
+        DEBUG("ullStartSectors = "<<ullStartSectors);
 
         if (!WriteSectors(m_hDisk,ullStartSectors,dwSectors,dwBytesPerSector,dataInfo->pData,&dwErrorCode))
         {
@@ -690,16 +634,17 @@ BOOL MakeImageDisk::WriteDisk()
         }
 
     }
-
+//    m_bReadImageOver = FALSE;
 
     if (bResult)
     {
-        DEBUG("write disk pass!");
+        DEBUG("write disk pass!-----------------------------------------------------");
     }
     else
     {
-        DEBUG("write disk failed!");
+        DEBUG("write disk failed!--------------------------------------------------");
     }
+    DEBUG("pDataQueue->GetCount() == "<<pDataQueue->GetCount());
 
     return bResult;
 }
@@ -1145,12 +1090,12 @@ BOOL MakeImageDisk::WriteLocalImage()
         delete dataInfo;
     }
 
+    m_bReadDiskOver = FALSE;
     // 写IMAGE头
     if (bResult)
     {
         ULONGLONG ullSize = 0;
         GetFileSize(m_hImage,ullSize);
-
 
         // 随机生成一个数作为IMAGEID
 
@@ -1506,6 +1451,49 @@ BOOL MakeImageDisk::WriteRemoteImage()
 //	}
 
     //	return bResult;
+}
+
+BOOL MakeImageDisk::OnCopyImage()
+{
+    IMAGE_HEADER imgHead ;
+    ZeroMemory(&imgHead,sizeof(IMAGE_HEADER));
+    DWORD dwErrorCode = 0;
+    DWORD dwLen = SIZEOF_IMAGE_HEADER;
+
+    if (!ReadFileAsyn(m_hImage,0,dwLen,(LPBYTE)&imgHead,&dwErrorCode))
+    {
+        ERROR("ReadFileAsyn error !");
+        return FALSE;
+    }
+
+
+    m_ullValidSize = imgHead.ullValidSize;
+    m_ullSectorNums = imgHead.ullCapacitySize / imgHead.dwBytesPerSector;
+    m_ullCapacity = imgHead.ullCapacitySize;
+    m_ullImageSize = imgHead.ullImageSize;
+    m_dwBytesPerSector = imgHead.dwBytesPerSector;
+    m_bDataCompress = (imgHead.byUnCompress == 0) ? TRUE : FALSE;
+
+
+
+
+    BOOL bResult = FALSE;
+
+
+    m_DataQueue.Clear();
+
+    pthread_t pthReadThread;
+    pthread_create(&pthReadThread,NULL,ReadImageThreadProc,this);
+
+    pthread_t pthWriteThreads ;
+    pthread_create(&pthWriteThreads,NULL,WriteDiskThreadProc,this);
+
+    //等待读磁盘线程结束
+    pthread_join(pthReadThread,NULL);
+    pthread_join(pthReadThread,NULL);
+
+
+    return bResult;
 }
 #include <sys/stat.h>
 BOOL MakeImageDisk::GetFileSize(int fd, ULONGLONG &ullSize)

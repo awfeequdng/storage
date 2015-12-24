@@ -63,7 +63,7 @@ using std::ostream;
     ofs.close();\
     }
 #else
-    #define DEBUG(str)  std::cerr<< str //<<std::endl;
+    #define DEBUG(str)  std::cerr<< str <<std::endl;
     #define DEBUGN(str) std::cerr<< str
 #endif      //DEBUG_TO_FILE
 
