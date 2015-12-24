@@ -173,15 +173,41 @@ CString &CString::Delete(unsigned int uiIndex, unsigned int uiCount)
 //在对象字符串中,从索引uiBegin开始,返回ch第一次出现的位置,省略uiBegin使其为默认的0,未找到返回-1
 int CString::Find(char ch, unsigned int uiBegin )
 {
-    return m_str.find(ch,uiBegin);
+    std::string::size_type size = m_str.find(ch,uiBegin);
+    if(size == std::string::npos)
+    {
+        return -1;
+    }
+    else
+    {
+        return size;
+    }
+
 }
-int CString::Find(char *str, unsigned int uiBegin)
+int CString::Find(const char *str, unsigned int uiBegin)
 {
-    return m_str.find(str,uiBegin);
+    std::string::size_type size = m_str.find(str,uiBegin);
+    if(size == std::string::npos)
+    {
+        return -1;
+    }
+    else
+    {
+        return size;
+    }
+
 }
 int CString::ReverseFind(char ch)
 {
-    return m_str.find_last_of(ch);
+    std::string::size_type size = m_str.find_last_of(ch);
+    if(size == std::string::npos)
+    {
+        return -1;
+    }
+    else
+    {
+        return size;
+    }
 }
 //int CString::FindOneOf(char *str)
 //{
@@ -218,6 +244,12 @@ CString CString::operator +(const CString &str) const
 CString &CString::operator +=(const CString &str)
 {
     m_str+=str.stdStr();
+    return (*this);
+}
+
+CString &CString::operator +=(const char *str)
+{
+    m_str+=str;
     return (*this);
 }
 

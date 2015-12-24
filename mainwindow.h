@@ -145,8 +145,6 @@ private:
     BOOL  m_bIsMTP;
 
     //记录监控界面的列和行
-    UINT m_nCols;
-    UINT m_nRows;
 
     CString m_strConfigPath; //记录配置文件的完整路径
 

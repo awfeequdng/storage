@@ -44,7 +44,7 @@ public:
     static ULONGLONG GetNumberOfSectors(HANDLE hDevice,PDWORD pdwBytesPerSector,MEDIA_TYPE *type);
     static void DeleteDirectory( LPCTSTR lpszPath );
     static BOOL CreateDisk(DISK_INDEX disk,ULONG PartitionNumber);
-//    static BOOL DestroyDisk(DISK_INDEX disk);
+    //    static BOOL DestroyDisk(DISK_INDEX disk);
     static BOOL DestroyDisk(HANDLE hDisk);
     static BOOL ChangeLetter(LPCTSTR lpszVolumeName,LPCTSTR lpszVolumePath);
     static BOOL GetDiskSymbol(LPCTSTR lpszVolumeName);
@@ -84,82 +84,82 @@ public:
 
     // 2014-10-14 增量拷贝新增
     void SetDiffCopyParm(UINT nSourceType,BOOL bServer,UINT nCompareRule,BOOL bUpload,const CStringArray &logArray,BOOL bIncludeSunDir);
-protected:
-    BOOL ReadSectors(HANDLE hDevice,
-        ULONGLONG ullStartSector,
-        DWORD dwSectors,
-        DWORD dwBytesPerSector,
-        LPBYTE lpSectBuff,
-        LPOVERLAPPED lpOverlap,
-        DWORD *pdwErrorCode,
-        DWORD dwTimeOut = 30000);
-    BOOL WriteSectors(HANDLE hDevice,
-        ULONGLONG ullStartSector,
-        DWORD dwSectors,
-        DWORD dwBytesPerSector,
-        LPBYTE lpSectBuff,
-        LPOVERLAPPED lpOverlap,
-        DWORD *pdwErrorCode,
-        DWORD dwTimeOut = 30000);
-    BOOL WriteFile(HANDLE hDevice,
-                  LPBYTE lpSectBuff,
-                  DWORD dwLen,
-                  DWORD &dwWriteLen,
-                  LPOVERLAPPED lpOverlap);
+public:
+    static BOOL ReadSectors(HANDLE hDevice,
+                            ULONGLONG ullStartSector,
+                            DWORD dwSectors,
+                            DWORD dwBytesPerSector,
+                            LPBYTE lpSectBuff,
+                            LPOVERLAPPED lpOverlap,
+                            DWORD *pdwErrorCode,
+                            DWORD dwTimeOut = 30000);
+    static BOOL WriteSectors(HANDLE hDevice,
+                             ULONGLONG ullStartSector,
+                             DWORD dwSectors,
+                             DWORD dwBytesPerSector,
+                             LPBYTE lpSectBuff,
+                             LPOVERLAPPED lpOverlap,
+                             DWORD *pdwErrorCode,
+                             DWORD dwTimeOut = 30000);
+    static BOOL WriteFile(HANDLE hDevice,
+                          LPBYTE lpSectBuff,
+                          DWORD dwLen,
+                          DWORD &dwWriteLen,
+                          LPOVERLAPPED lpOverlap);
 
-    BOOL ReadFileAsyn(HANDLE hFile,
-        ULONGLONG ullOffset,
-        DWORD &dwSize,
-        LPBYTE lpBuffer,
-        LPOVERLAPPED lpOverlap,
-        PDWORD pdwErrorCode,
-        DWORD dwTimeOut = 50000);
-    BOOL WriteFileAsyn(HANDLE hFile,
-        ULONGLONG ullOffset,
-        DWORD &dwSize,
-        LPBYTE lpBuffer,
-        LPOVERLAPPED lpOverlap,
-        PDWORD pdwErrorCode,
-        DWORD dwTimeOut= 50000);
+    static BOOL ReadFileAsyn(HANDLE hFile,
+                             ULONGLONG ullOffset,
+                             DWORD &dwSize,
+                             LPBYTE lpBuffer,
+                             LPOVERLAPPED lpOverlap,
+                             PDWORD pdwErrorCode,
+                             DWORD dwTimeOut = 50000);
+    static BOOL WriteFileAsyn(HANDLE hFile,
+                              ULONGLONG ullOffset,
+                              DWORD &dwSize,
+                              LPBYTE lpBuffer,
+                              LPOVERLAPPED lpOverlap,
+                              PDWORD pdwErrorCode,
+                              DWORD dwTimeOut= 50000);
 
 
 
-        BOOL ReadSectors(HANDLE hDevice,
-                ULONGLONG ullStartSector,
-                DWORD dwSectors,
-                DWORD dwBytesPerSector,
-                LPBYTE lpSectBuff,
-                DWORD *pdwErrorCode,
-                DWORD dwTimeOut = 30000);
-        BOOL ReadFile(HANDLE hDevice,
-                      LPBYTE lpSectBuff,
-                      DWORD dwLen,
-                      DWORD &dwReadLen,
-                      ULONGLONG offset);
-            BOOL WriteSectors(HANDLE hDevice,
-                ULONGLONG ullStartSector,
-                DWORD dwSectors,
-                DWORD dwBytesPerSector,
-                LPBYTE lpSectBuff,
-                DWORD *pdwErrorCode,
-                DWORD dwTimeOut = 30000);
-            BOOL WriteFile(HANDLE hDevice,
+    static BOOL ReadSectors(HANDLE hDevice,
+                            ULONGLONG ullStartSector,
+                            DWORD dwSectors,
+                            DWORD dwBytesPerSector,
+                            LPBYTE lpSectBuff,
+                            DWORD *pdwErrorCode,
+                            DWORD dwTimeOut = 30000);
+    static BOOL ReadFile(HANDLE hDevice,
+                         LPBYTE lpSectBuff,
+                         DWORD dwLen,
+                         DWORD &dwReadLen,
+                         ULONGLONG offset);
+    static BOOL WriteSectors(HANDLE hDevice,
+                             ULONGLONG ullStartSector,
+                             DWORD dwSectors,
+                             DWORD dwBytesPerSector,
+                             LPBYTE lpSectBuff,
+                             DWORD *pdwErrorCode,
+                             DWORD dwTimeOut = 30000);
+    static BOOL WriteFile(HANDLE hDevice,
                           LPBYTE lpSectBuff,
                           DWORD dwLen,
                           DWORD &dwWriteLen,
                           ULONGLONG offset);
-            BOOL ReadFileAsyn(HANDLE hFile,
-                ULONGLONG ullOffset,
-                DWORD &dwSize,
-                LPBYTE lpBuffer,
-                PDWORD pdwErrorCode,
-                DWORD dwTimeOut = 50000);
-            BOOL WriteFileAsyn(HANDLE hFile,
-                ULONGLONG ullOffset,
-                DWORD &dwSize,
-                LPBYTE lpBuffer,
-                PDWORD pdwErrorCode,
-                DWORD dwTimeOut= 50000);
+    static BOOL ReadFileAsyn(HANDLE hFile,
+                             ULONGLONG ullOffset,
+                             DWORD &dwSize,
+                             LPBYTE lpBuffer,
+                             PDWORD pdwErrorCode,
+                             DWORD dwTimeOut = 50000);
+    static BOOL WriteFileAsyn(HANDLE hFile,
+                              ULONGLONG ullOffset,
+                              DWORD &dwSize,
+                              LPBYTE lpBuffer,
+                              PDWORD pdwErrorCode,
+                              DWORD dwTimeOut= 50000);
 
 private:
     // 文件系统分析

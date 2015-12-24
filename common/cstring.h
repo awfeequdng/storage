@@ -61,13 +61,14 @@ public:
     CString &TrimRight(char *str);
     //查找函数
     int Find(char ch, unsigned int uiBegin = 0);
-    int Find(char *str, unsigned int uiBegin = 0);
+    int Find(const char *str, unsigned int uiBegin = 0);
     int ReverseFind(char ch);
 //    int FindOneOf(char *str);
     /*声明成员函数 End*/
 
     CString operator +(const CString &str)const;
     CString &operator +=(const CString &str);
+    CString &operator +=(const char* str);
     bool operator !=(const CString &str)const ;
 //    /*声明重载的操作符 Begin*/
 //    //作为成员函数
@@ -79,29 +80,30 @@ public:
 //    CString& 	  operator+=(CString &Str);
 //    const char& operator[](unsigned int n);
 //    //作为友元
-    friend CString&operator+ (CString &Str1, CString &Str2);
-    friend CString&operator+ (CString &Str, const char *str);
-    friend CString&operator+ (const char *str, CString &Str);
-    friend CString&operator+ (CString &Str, char ch);
-    friend CString&operator+ (char ch, CString &Str);
-    friend bool operator==(CString &Str1, CString &Str2);
-    friend bool operator==(CString &Str, const char *str);
-    friend bool operator==(const char *str, CString &Str);
-    friend bool operator!=(const CString &Str1, const CString &Str2);
-    friend bool operator!=(const CString &Str, const char *str);
-    friend bool operator!=(const char *str, const CString &Str);
-    friend bool operator< (const CString &Str1, const CString &Str2);
-    friend bool operator< (const CString &Str, const char *str);
-    friend bool operator< (const char *str, const CString &Str);
-    friend bool operator> (const CString &Str1, const CString &Str2);
-    friend bool operator> (const CString &Str, const char *str);
-    friend bool operator> (const char *str, const CString &Str);
-    friend bool operator<=(const CString &Str1, const CString &Str2);
-    friend bool operator<=(const CString &Str, const char *str);
-    friend bool operator<=(const char *str, const CString &Str);
-    friend bool operator>=(const CString &Str1, const CString &Str2);
-    friend bool operator>=(const CString &Str, const char *str);
-    friend bool operator>=(const char *str, const CString &Str);
+
+//    friend CString&operator+ (CString &Str1, CString &Str2);
+//    friend CString&operator+ (CString &Str, const char *str);
+//    friend CString&operator+ (const char *str, CString &Str);
+//    friend CString&operator+ (CString &Str, char ch);
+//    friend CString&operator+ (char ch, CString &Str);
+//    friend bool operator==(CString &Str1, CString &Str2);
+//    friend bool operator==(CString &Str, const char *str);
+//    friend bool operator==(const char *str, CString &Str);
+//    friend bool operator!=(const CString &Str1, const CString &Str2);
+//    friend bool operator!=(const CString &Str, const char *str);
+//    friend bool operator!=(const char *str, const CString &Str);
+//    friend bool operator< (const CString &Str1, const CString &Str2);
+//    friend bool operator< (const CString &Str, const char *str);
+//    friend bool operator< (const char *str, const CString &Str);
+//    friend bool operator> (const CString &Str1, const CString &Str2);
+//    friend bool operator> (const CString &Str, const char *str);
+//    friend bool operator> (const char *str, const CString &Str);
+//    friend bool operator<=(const CString &Str1, const CString &Str2);
+//    friend bool operator<=(const CString &Str, const char *str);
+//    friend bool operator<=(const char *str, const CString &Str);
+//    friend bool operator>=(const CString &Str1, const CString &Str2);
+//    friend bool operator>=(const CString &Str, const char *str);
+//    friend bool operator>=(const char *str, const CString &Str);
 //   /*声明重载的操作符 End*/
 private:
     std::string replaceAll(const std::string &src, std::string org_str, std::string rep_str);
