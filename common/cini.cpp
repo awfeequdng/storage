@@ -167,7 +167,7 @@ BOOL CIni::IsKeyExist(std::string field, std::string key)
     }
 }
 
-
+#include <stdlib.h>
 
 void CIni::ReadIniFile(std::string filename)
 {
@@ -256,7 +256,11 @@ void CIni::ReadIniFile(std::string filename)
     }
     else
     {
-        std::cerr<<"Unable to load ini file "<<filename;
+        char buf[20] = {0};
+        sprintf(buf,"%d",__LINE__);
+        string strErr = string("[ file ]")+string(__FILE__)+" [line] :"+string(buf)+
+                " Unable to load ini file :"+filename;
+        std::cerr<<strErr<<std::endl;
         abort();
     }
     /* precompute frequently used values */

@@ -180,6 +180,8 @@ BOOL MakeImageDisk::IsReachLimitQty(int limit)
 
 BOOL MakeImageDisk::ReadSectors(HANDLE hDevice, ULONGLONG ullStartSector, DWORD dwSectors, DWORD dwBytesPerSector, LPBYTE lpSectBuff, DWORD *pdwErrorCode, DWORD dwTimeOut)
 {
+    USE_PARAM(pdwErrorCode);
+    USE_PARAM(dwTimeOut);
     ULONGLONG ullOffset = ullStartSector * dwBytesPerSector;
     DWORD dwLen = dwSectors * dwBytesPerSector;
     DWORD dwErrorCode = 0;
@@ -236,9 +238,11 @@ BOOL MakeImageDisk::ReadFile(HANDLE hDevice, LPBYTE lpSectBuff, DWORD dwLen, DWO
 
 BOOL MakeImageDisk::WriteSectors(HANDLE hDevice, ULONGLONG ullStartSector, DWORD dwSectors, DWORD dwBytesPerSector, LPBYTE lpSectBuff, DWORD *pdwErrorCode, DWORD dwTimeOut)
 {
+    USE_PARAM(pdwErrorCode);
+    USE_PARAM(dwTimeOut);
     ULONGLONG ullOffset = ullStartSector * dwBytesPerSector;
     DWORD dwLen = dwSectors * dwBytesPerSector;
-    DWORD dwWriteLen = 0;
+//    DWORD dwWriteLen = 0;
     DWORD dwErrorCode = 0;
     return WriteFileAsyn(hDevice,ullOffset,dwLen,lpSectBuff,&dwErrorCode);
 }
@@ -267,6 +271,8 @@ BOOL MakeImageDisk::WriteFile(HANDLE hDevice, LPBYTE lpSectBuff, DWORD dwLen, DW
 
 BOOL MakeImageDisk::ReadFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYTE lpBuffer, PDWORD pdwErrorCode, DWORD dwTimeOut)
 {
+    USE_PARAM(pdwErrorCode);
+    USE_PARAM(dwTimeOut);
     DWORD dwReadSize = 0;
     if(!ReadFile(hFile,lpBuffer,dwSize,dwReadSize,ullOffset))
     {
@@ -289,6 +295,8 @@ BOOL MakeImageDisk::ReadFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSiz
 
 BOOL MakeImageDisk::WriteFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYTE lpBuffer, PDWORD pdwErrorCode, DWORD dwTimeOut)
 {
+    USE_PARAM(pdwErrorCode);
+    USE_PARAM(dwTimeOut);
     DWORD dwWriteSize = 0;
     if(!WriteFile(hFile,lpBuffer,dwSize,dwWriteSize,ullOffset))
     {
@@ -315,7 +323,7 @@ BOOL MakeImageDisk::ReadDisk()
 {
     BOOL bResult = TRUE;
     DWORD dwErrorCode = 0;
-    ErrorType errType = ErrorType_System;
+//    ErrorType errType = ErrorType_System;
     ULONGLONG ullReadSectors = 0;
     ULONGLONG ullRemainSectors = 0;
     ULONGLONG ullStartSectors = 0;
@@ -449,24 +457,28 @@ void *MakeImageDisk::ReadDiskThreadProc(LPVOID param)
 {
     MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
     pMakeImage->ReadDisk();
+    return NULL;
 }
 
 void *MakeImageDisk::ReadImageThreadProc(LPVOID param)
 {
     MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
     pMakeImage->ReadImage();
+    return NULL;
 }
 
 void *MakeImageDisk::WriteDiskThreadProc(LPVOID param)
 {
     MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
     pMakeImage->WriteDisk();
+    return NULL;
 }
 
 void *MakeImageDisk::WriteImageThreadProc(LPVOID param)
 {
     MakeImageDisk *pMakeImage = (MakeImageDisk *)param;
     pMakeImage->WriteImage();
+    return NULL;
 }
 
 
@@ -474,7 +486,7 @@ BOOL MakeImageDisk::ReadLocalImage()
 {
     BOOL bResult = TRUE;
     DWORD dwErrorCode = 0;
-    ErrorType errType = ErrorType_System;
+//    ErrorType errType = ErrorType_System;
 
     ULONGLONG ullReadSize = SIZEOF_IMAGE_HEADER;
     ULONGLONG ullOffset = SIZEOF_IMAGE_HEADER;
@@ -482,7 +494,7 @@ BOOL MakeImageDisk::ReadLocalImage()
 
     // 计算精确速度
 //    LARGE_INTEGER freq,t0,t1,t2,t3;
-    double dbTimeNoWait = 0.0,dbTimeWait = 0.0;
+//    double dbTimeNoWait = 0.0,dbTimeWait = 0.0;
 
 //    QueryPerformanceFrequency(&freq);
     m_bReadImageOver = FALSE;
@@ -531,7 +543,7 @@ BOOL MakeImageDisk::ReadLocalImage()
 
         if (pByte[dwLen-1] != END_FLAG)
         {
-            errType = ErrorType_Custom;
+//            errType = ErrorType_Custom;
             dwErrorCode = CustomError_Image_Format_Error;
             bResult = FALSE;
             delete []pByte;
@@ -583,7 +595,7 @@ BOOL MakeImageDisk::WriteDisk()
 {
     BOOL bResult = TRUE;
     DWORD dwErrorCode = 0;
-    ErrorType errType = ErrorType_System;
+//    ErrorType errType = ErrorType_System;
 
 
     DWORD dwBytesPerSector = m_dwBytesPerSector;
@@ -652,331 +664,7 @@ BOOL MakeImageDisk::WriteDisk()
 
 BOOL MakeImageDisk::ReadRemoteImage()
 {
-//	BOOL bResult = TRUE;
-//	DWORD dwErrorCode = 0;
-//	ErrorType errType = ErrorType_System;
-
-//	ULONGLONG ullReadSize = SIZEOF_IMAGE_HEADER;
-//	DWORD dwLen = 0;
-
-//	// 计算精确速度
-//	LARGE_INTEGER freq,t0,t1,t2,t3;
-//	double dbTimeNoWait = 0.0,dbTimeWait = 0.0;
-
-//	WSAOVERLAPPED ol = {0};
-//	ol.hEvent = WSACreateEvent();
-
-//	QueryPerformanceFrequency(&freq);
-
-//	m_MasterPort->Active();
-
-//	// 等待其他线程创建好,最多等5次
-//	Sleep(100);
-
-//	int nTimes = 5;
-//	while (!IsTargetsReady() && nTimes > 0)
-//	{
-//		Sleep(100);
-//		nTimes--;
-//	}
-
-//	// 发送COPY IMAGE命令
-//	CString strImageName = CUtils::GetFileName(m_MasterPort->GetFileName());
-
-//	USES_CONVERSION;
-//	char *fileName = W2A(strImageName);
-
-//	DWORD dwSendLen = sizeof(CMD_IN) + strlen(fileName) + 2;
-//	BYTE *sendBuf = new BYTE[dwSendLen];
-//	ZeroMemory(sendBuf,dwSendLen);
-//	sendBuf[dwSendLen - 1] = END_FLAG;
-
-//	CMD_IN copyImageIn = {0};
-//	copyImageIn.dwCmdIn = CMD_COPY_IMAGE_IN;
-//	copyImageIn.dwSizeSend = dwSendLen;
-
-//	memcpy(sendBuf,&copyImageIn,sizeof(CMD_IN));
-//	memcpy(sendBuf + sizeof(CMD_IN),fileName,strlen(fileName));
-
-//	while (bResult && !*m_lpCancel && ullReadSize < m_ullImageSize && m_MasterPort->GetPortState() == PortState_Active)
-//	{
-//		QueryPerformanceCounter(&t0);
-
-//		// 判断队列是否达到限制值
-//		while (IsReachLimitQty(MAX_LENGTH_OF_DATA_QUEUE)
-//			&& !*m_lpCancel && !IsAllFailed(errType,&dwErrorCode))
-//		{
-//			//SwitchToThread();
-//			Sleep(5);
-//		}
-
-//		if (*m_lpCancel)
-//		{
-//			dwErrorCode = CustomError_Cancel;
-//			errType = ErrorType_Custom;
-//			bResult = FALSE;
-//			break;
-//		}
-
-//		if (IsAllFailed(errType,&dwErrorCode))
-//		{
-//			bResult = FALSE;
-//			break;
-//		}
-
-//		QueryPerformanceCounter(&t1);
-
-//		if (!Send(m_ClientSocket,(char *)sendBuf,dwSendLen,NULL,&dwErrorCode))
-//		{
-//			bResult = FALSE;
-
-//			CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Send copy image command error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
-//				,m_MasterPort->GetFileName(),m_MasterPort->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
-
-//			break;
-//		}
-
-//		CMD_OUT copyImageOut = {0};
-//		dwLen = sizeof(CMD_OUT);
-//		if (!Recv(m_ClientSocket,(char *)&copyImageOut,dwLen,&ol,&dwErrorCode))
-//		{
-//			bResult = FALSE;
-
-//			CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Recv copy image error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
-//				,strImageName,m_MasterPort->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
-//			break;
-//		}
-
-//		dwLen = copyImageOut.dwSizeSend - sizeof(CMD_OUT);
-
-//		BYTE *pByte = new BYTE[dwLen];
-//		ZeroMemory(pByte,dwLen);
-
-//		DWORD dwRead = 0;
-
-//		while(dwRead < dwLen)
-//		{
-//			DWORD dwByteRead = dwLen - dwRead;
-//			if (!Recv(m_ClientSocket,(char *)(pByte+dwRead),dwByteRead,&ol,&dwErrorCode))
-//			{
-//				bResult = FALSE;
-
-//				CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Recv copy image error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
-//					,strImageName,m_MasterPort->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
-//				break;
-//			}
-
-//			dwRead += dwByteRead;
-//		}
-
-//		if (dwRead < dwLen)
-//		{
-//			bResult = FALSE;
-
-//			delete []pByte;
-
-//			break;
-//		}
-
-//		if (copyImageOut.dwErrorCode != 0)
-//		{
-//			bResult = FALSE;
-//			errType = copyImageOut.errType;
-//			dwErrorCode = copyImageOut.dwErrorCode;
-
-//			delete []pByte;
-
-//			CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Recv copy image error,filename=%s,Speed=%.2f,system errorcode=%d,%s")
-//				,strImageName,m_MasterPort->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
-//			break;
-//		}
-
-//		if (copyImageOut.dwCmdOut != CMD_COPY_IMAGE_OUT || copyImageOut.dwSizeSend != dwLen + sizeof(CMD_OUT))
-//		{
-//			bResult = FALSE;
-//			errType = ErrorType_Custom;
-//			dwErrorCode = CustomError_Get_Data_From_Server_Error;
-
-//			delete []pByte;
-
-//			CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Recv copy image error,filename=%s,Speed=%.2f,custom errorcode=0x%X,get data from server error")
-//				,strImageName,m_MasterPort->GetRealSpeed(),dwErrorCode);
-//			break;
-//		}
-
-
-//		// 去除尾部标志
-//		dwLen -= 1;
-
-//		QueryPerformanceCounter(&t2);
-
-//		PDATA_INFO dataInfo = new DATA_INFO;
-//		ZeroMemory(dataInfo,sizeof(DATA_INFO));
-
-//		dataInfo->ullOffset = *(PULONGLONG)pByte;
-//		dataInfo->dwDataSize = dwLen - PKG_HEADER_SIZE - 1;
-//		dataInfo->pData = new BYTE[dataInfo->dwDataSize];
-//		memcpy(dataInfo->pData,&pByte[PKG_HEADER_SIZE],dataInfo->dwDataSize);
-
-//		if (m_bDataCompress)
-//		{
-//			m_CompressQueue.AddTail(dataInfo);
-//		}
-//		else
-//		{
-//			AddDataQueueList(dataInfo);
-
-//			m_pMasterHashMethod->update(dataInfo->pData,dataInfo->dwDataSize);
-
-//			delete []dataInfo->pData;
-//			delete dataInfo;
-//		}
-
-
-//		// 写文件
-//		if (m_hDisk != INVALID_HANDLE_VALUE)
-//		{
-//			WriteFileAsyn(m_hDisk,ullReadSize,dwLen,pByte,m_MasterPort->GetOverlapped(FALSE),&dwErrorCode);
-//		}
-
-
-//		dwErrorCode = 0;
-
-//		delete []pByte;
-
-//		ullReadSize += dwLen;
-
-//		QueryPerformanceCounter(&t3);
-
-//		dbTimeNoWait = (double)(t2.QuadPart - t1.QuadPart) / (double)freq.QuadPart; // 秒
-//		dbTimeWait = (double)(t3.QuadPart - t0.QuadPart) / (double)freq.QuadPart; // 秒
-//		m_MasterPort->AppendUsedWaitTimeS(dbTimeWait);
-//		m_MasterPort->AppendUsedNoWaitTimeS(dbTimeNoWait);
-
-//		// 因为是压缩数据，长度比实际长度短，所以要根据速度计算
-//		m_MasterPort->SetCompleteSize(m_MasterPort->GetValidSize() * ullReadSize / m_ullImageSize);
-
-//		/*
-//		if (IsAllFailed(errType,&dwErrorCode))
-//		{
-//			bResult = FALSE;
-//			break;
-//		}
-//		*/
-
-//	}
-
-//	WSACloseEvent(ol.hEvent);
-
-//	if (!bResult)
-//	{
-//		// 发送停止命令
-//		copyImageIn.byStop = TRUE;
-//		memcpy(sendBuf,&copyImageIn,sizeof(CMD_IN));
-//		memcpy(sendBuf + sizeof(CMD_IN),fileName,strlen(fileName));
-
-//		DWORD dwError = 0;
-
-//		Send(m_ClientSocket,(char *)sendBuf,dwSendLen,NULL,&dwError);
-//	}
-
-//	delete []sendBuf;
-
-//	if (*m_lpCancel)
-//	{
-//		bResult = FALSE;
-//		dwErrorCode = CustomError_Cancel;
-//		errType = ErrorType_Custom;
-
-//		CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Read image file error,filename=%s,Speed=%.2f,custom errorcode=0x%X,user cancelled.")
-//			,m_MasterPort->GetFileName(),m_MasterPort->GetRealSpeed(),dwErrorCode);
-//	}
-
-//	// 先设置为停止状态
-//	// 先设置为停止状态
-//	if (bResult)
-//	{
-//		m_MasterPort->SetPortState(PortState_Stop);
-//	}
-//	else
-//	{
-//		m_MasterPort->SetResult(FALSE);
-//		m_MasterPort->SetPortState(PortState_Fail);
-//		m_MasterPort->SetErrorCode(errType,dwErrorCode);
-//	}
-
-
-//	// 所有数据都拷贝完
-//	while (!m_bCompressComplete)
-//	{
-//		//SwitchToThread();
-//		Sleep(100);
-//	}
-
-//	if (!m_MasterPort->GetResult())
-//	{
-//		bResult = FALSE;
-//		errType = m_MasterPort->GetErrorCode(&dwErrorCode);
-//	}
-
-//	m_MasterPort->SetEndTime(CTime::GetCurrentTime());
-
-//	if (bResult)
-//	{
-//		if (m_bComputeHash)
-//		{
-//			m_MasterPort->SetHash(m_pMasterHashMethod->digest(),m_pMasterHashMethod->getHashLength());
-
-//			CString strImageHash;
-//			for (int i = 0; i < m_pMasterHashMethod->getHashLength();i++)
-//			{
-//				CString strHash;
-//				strHash.Format(_T("%02X"),m_pMasterHashMethod->digest()[i]);
-//				m_strMasterHash += strHash;
-
-//				strHash.Format(_T("%02X"),m_ImageHash[i]);
-//				strImageHash += strHash;
-//			}
-
-//			CString strHashMethod(m_pMasterHashMethod->getHashMetod());
-
-//			// 此处加入判断IMAGE解压过程中是否出错
-//			if (strImageHash.CompareNoCase(m_strMasterHash) != 0)
-//			{
-//				CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Image,%s - %s,Image hash value was changed,Compute=%s,Record=%s")
-//					,m_MasterPort->GetFileName(),strHashMethod,m_strMasterHash,strImageHash);
-
-//				bResult = FALSE;
-//				m_MasterPort->SetResult(FALSE);
-//				m_MasterPort->SetPortState(PortState_Fail);
-//				m_MasterPort->SetErrorCode(ErrorType_Custom,CustomError_Image_Hash_Value_Changed);
-//			}
-//			else
-//			{
-//				m_MasterPort->SetResult(TRUE);
-//				m_MasterPort->SetPortState(PortState_Pass);
-//				m_MasterPort->SetErrorCode(errType,dwErrorCode);
-
-//				CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Image,%s - %s,HashValue=%s")
-//					,m_MasterPort->GetFileName(),strHashMethod,m_strMasterHash);
-//			}
-
-//		}
-//		else
-//		{
-//			m_MasterPort->SetResult(TRUE);
-//			m_MasterPort->SetPortState(PortState_Pass);
-//			m_MasterPort->SetErrorCode(errType,dwErrorCode);
-//		}
-//	}
-//	else
-//	{
-//		m_MasterPort->SetResult(FALSE);
-//		m_MasterPort->SetPortState(PortState_Fail);
-//		m_MasterPort->SetErrorCode(errType,dwErrorCode);
-//	}
-
-//	return bResult;
+    return NULL;
 }
 
 
@@ -1028,7 +716,7 @@ BOOL MakeImageDisk::WriteLocalImage()
 {
     BOOL bResult = TRUE;
     DWORD dwErrorCode = 0;
-    ErrorType errType = ErrorType_System;
+//    ErrorType errType = ErrorType_System;
     ULONGLONG ullPkgIndex = 0;
     ULONGLONG ullOffset = SIZEOF_IMAGE_HEADER;
     DWORD dwLen = 0;
@@ -1045,7 +733,7 @@ BOOL MakeImageDisk::WriteLocalImage()
     }
 
     // 计算精确速度
-    double dbTimeNoWait = 0.0,dbTimeWait = 0.0;
+//    double dbTimeNoWait = 0.0,dbTimeWait = 0.0;
 
 
     while (!m_bReadDiskOver||pDataQueue->GetCount()>0)
@@ -1145,312 +833,7 @@ BOOL MakeImageDisk::WriteLocalImage()
 
 BOOL MakeImageDisk::WriteRemoteImage()
 {
-//	BOOL bResult = TRUE;
-//	DWORD dwErrorCode = 0;
-//	ErrorType errType = ErrorType_System;
-//	ULONGLONG ullPkgIndex = 0;
-//	ULONGLONG ullOffset = SIZEOF_IMAGE_HEADER;
-//	DWORD dwLen = 0;
-
-//	port->Active();
-
-//	CString strImageName = CUtils::GetFileName(port->GetFileName());
-
-//	USES_CONVERSION;
-//	char *fileName = W2A(strImageName);
-
-//	CMD_IN makeImageIn = {0};
-//	makeImageIn.dwCmdIn = CMD_MAKE_IMAGE_IN;
-//	makeImageIn.byStop = FALSE;
-
-//	WSAOVERLAPPED olSend = {0};
-//	olSend.hEvent = WSACreateEvent();
-
-//	WSAOVERLAPPED olRecv = {0};
-//	olRecv.hEvent = WSACreateEvent();
-
-//	// 计算精确速度
-//	LARGE_INTEGER freq,t0,t1,t2;
-//	double dbTimeNoWait = 0.0,dbTimeWait = 0.0;
-
-//	QueryPerformanceFrequency(&freq);
-
-//	while (!*m_lpCancel && m_MasterPort->GetResult() && port->GetResult())
-//	{
-//		//dwTimeWait = timeGetTime();
-//		QueryPerformanceCounter(&t0);
-//		while(pDataQueue->GetCount() <=0 && !*m_lpCancel && m_MasterPort->GetResult()
-//			&& (m_MasterPort->GetPortState() == PortState_Active || !m_bCompressComplete)
-//			&& port->GetResult())
-//		{
-//			//SwitchToThread();
-//			Sleep(5);
-//		}
-
-//		if (!m_MasterPort->GetResult())
-//		{
-//			errType = m_MasterPort->GetErrorCode(&dwErrorCode);
-//			bResult = FALSE;
-//			break;
-//		}
-
-//		if (!port->GetResult())
-//		{
-//			errType = port->GetErrorCode(&dwErrorCode);
-//			bResult = FALSE;
-//			break;
-//		}
-
-//		if (*m_lpCancel)
-//		{
-//			dwErrorCode = CustomError_Cancel;
-//			errType = ErrorType_Custom;
-//			bResult = FALSE;
-//			break;
-//		}
-
-//		if (pDataQueue->GetCount() <= 0 && m_MasterPort->GetPortState() != PortState_Active && m_bCompressComplete)
-//		{
-//			dwErrorCode = 0;
-//			bResult = TRUE;
-//			break;
-//		}
-
-//		PDATA_INFO dataInfo = pDataQueue->GetHeadRemove();
-
-//		if (dataInfo == NULL)
-//		{
-//			continue;
-//		}
-
-//		if (m_bDataCompress)
-//		{
-//			*(PULONGLONG)dataInfo->pData = ullPkgIndex;
-//		}
-
-//		ullPkgIndex++;
-
-//		QueryPerformanceCounter(&t1);
-
-//		dwLen = sizeof(CMD_IN) + strlen(fileName) + 2 + dataInfo->dwDataSize;
-
-//		makeImageIn.dwSizeSend = dwLen;
-
-//		BYTE *pByte = new BYTE[dwLen];
-//		ZeroMemory(pByte,dwLen);
-//		memcpy(pByte,&makeImageIn,sizeof(CMD_IN));
-//		memcpy(pByte+sizeof(CMD_IN),fileName,strlen(fileName));
-//		memcpy(pByte+sizeof(CMD_IN)+strlen(fileName)+1,dataInfo->pData,dataInfo->dwDataSize);
-
-//		if (!Send(m_ClientSocket,(char *)pByte,dwLen,&olSend,&dwErrorCode))
-//		{
-//			delete []pByte;
-//			bResult = FALSE;
-
-//			delete []dataInfo->pData;
-//			delete dataInfo;
-
-//			CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Send write image file error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
-//				,strImageName,port->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
-
-//			break;
-//		}
-
-//		delete []pByte;
-
-//		// 读返回值
-//		CMD_OUT makeImageOut = {0};
-//		dwLen = sizeof(CMD_OUT);
-//		if (!Recv(m_ClientSocket,(char *)&makeImageOut,dwLen,&olRecv,&dwErrorCode))
-//		{
-//			bResult = FALSE;
-
-//			delete []dataInfo->pData;
-//			delete dataInfo;
-
-//			CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Recv write image file error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
-//				,strImageName,port->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
-
-//			break;
-//		}
-
-//		if (makeImageOut.dwErrorCode != 0)
-//		{
-//			dwErrorCode = makeImageOut.dwErrorCode;
-//			bResult = FALSE;
-
-//			delete []dataInfo->pData;
-//			delete dataInfo;
-
-//			CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Recv write image file error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
-//				,strImageName,port->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
-
-//			break;
-//		}
-
-//		if (makeImageOut.dwCmdOut != CMD_MAKE_IMAGE_OUT || makeImageOut.dwSizeSend != dwLen)
-//		{
-//			dwErrorCode = CustomError_Get_Data_From_Server_Error;
-//			errType = ErrorType_Custom;
-//			bResult = FALSE;
-
-//			delete []dataInfo->pData;
-//			delete dataInfo;
-
-//			CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Recv write image file error,filename=%s,Speed=%.2f,custom errorcode=0x%X,get data from server error")
-//				,strImageName,port->GetRealSpeed(),dwErrorCode);
-
-//			break;
-//		}
-
-//		//DWORD dwTime = timeGetTime();
-//		QueryPerformanceCounter(&t2);
-
-//		dbTimeWait = (double)(t2.QuadPart - t0.QuadPart) / (double)freq.QuadPart;
-
-//		dbTimeNoWait = (double)(t2.QuadPart - t1.QuadPart) / (double)freq.QuadPart;
-
-//		ullOffset += dataInfo->dwDataSize;
-
-//		port->AppendUsedNoWaitTimeS(dbTimeNoWait);
-//		port->AppendUsedWaitTimeS(dbTimeNoWait);
-
-//		// 压缩的数据比实际数据短，不能取压缩后的长度，要不压缩之前的长度
-//		port->AppendCompleteSize(dataInfo->dwOldSize);
-
-//		delete []dataInfo->pData;
-//		delete dataInfo;
-
-//	}
-
-//	if (*m_lpCancel)
-//	{
-//		bResult = FALSE;
-//		dwErrorCode = CustomError_Cancel;
-//		errType = ErrorType_Custom;
-
-//		CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Write image file error,filename=%s,Speed=%.2f,custom errorcode=0x%X,user cancelled.")
-//			,port->GetFileName(),port->GetRealSpeed(),dwErrorCode);
-//	}
-
-//	if (!m_MasterPort->GetResult())
-//	{
-//		bResult = FALSE;
-//		errType = m_MasterPort->GetErrorCode(&dwErrorCode);
-//	}
-
-//	if (!port->GetResult())
-//	{
-//		errType = port->GetErrorCode(&dwErrorCode);
-//		bResult = FALSE;
-//	}
-
-//	// 写IMAGE头
-//	if (bResult)
-//	{
-
-//		IMAGE_HEADER imgHead;
-//		ZeroMemory(&imgHead,sizeof(IMAGE_HEADER));
-//		memcpy(imgHead.szImageFlag,IMAGE_FLAG,strlen(IMAGE_FLAG));
-//		imgHead.ullImageSize = ullOffset;
-//		memcpy(imgHead.szAppVersion,APP_VERSION,strlen(APP_VERSION));
-
-//		if (m_nImageType)
-//		{
-//			imgHead.dwImageType = QUICK_IMAGE;
-//		}
-//		else
-//		{
-//			imgHead.dwImageType = FULL_IMAGE;
-//		}
-
-//		imgHead.dwMaxSizeOfPackage = MAX_COMPRESS_BUF;
-//		imgHead.ullCapacitySize = m_MasterPort->GetTotalSize();
-//		imgHead.dwBytesPerSector = m_MasterPort->GetBytesPerSector();
-//		memcpy(imgHead.szZipVer,ZIP_VERSION,strlen(ZIP_VERSION));
-//		imgHead.byUnCompress = m_bDataCompress ? 0 : 1;
-//		imgHead.ullPkgCount = ullPkgIndex;
-//		imgHead.ullValidSize = m_MasterPort->GetValidSize();
-//		imgHead.dwHashLen = m_pMasterHashMethod->getHashLength();
-//		imgHead.dwHashType = m_MasterPort->GetHashMethod();
-//		memcpy(imgHead.byImageDigest,m_pMasterHashMethod->digest(),m_pMasterHashMethod->getHashLength());
-//		imgHead.byEnd = END_FLAG;
-
-//		dwLen = sizeof(CMD_IN) + strlen(fileName) + 2 + SIZEOF_IMAGE_HEADER;
-
-//		makeImageIn.dwSizeSend = dwLen;
-
-//		BYTE *pByte = new BYTE[dwLen];
-//		ZeroMemory(pByte,dwLen);
-//		pByte[dwLen - 1] = END_FLAG;
-
-//		memcpy(pByte,&makeImageIn,sizeof(CMD_IN));
-//		memcpy(pByte+sizeof(CMD_IN),fileName,strlen(fileName));
-//		memcpy(pByte+sizeof(CMD_IN)+strlen(fileName)+1,&imgHead,SIZEOF_IMAGE_HEADER);
-
-//		if (!Send(m_ClientSocket,(char *)pByte,dwLen,&olSend,&dwErrorCode))
-//		{
-//			delete []pByte;
-//			bResult = FALSE;
-//			CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Send write image file error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
-//				,strImageName,port->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
-//			goto END;
-//		}
-
-//		delete []pByte;
-
-//		// 读返回值
-//		CMD_OUT makeImageOut = {0};
-//		dwLen = sizeof(CMD_OUT);
-//		if (!Recv(m_ClientSocket,(char *)&makeImageOut,dwLen,&olRecv,&dwErrorCode))
-//		{
-//			bResult = FALSE;
-//			CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Recv write image file error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
-//				,strImageName,port->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
-
-//			goto END;
-//		}
-
-//		if (makeImageOut.dwErrorCode != 0)
-//		{
-//			dwErrorCode = makeImageOut.dwErrorCode;
-//			bResult = FALSE;
-//			CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Recv write image file error,filename=%s,Speed=%.2f,system errorcode=%ld,%s")
-//				,strImageName,port->GetRealSpeed(),dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
-
-//			goto END;
-//		}
-
-//		if (makeImageOut.dwCmdOut != CMD_MAKE_IMAGE_OUT || makeImageOut.dwSizeSend != dwLen)
-//		{
-//			dwErrorCode = CustomError_Get_Data_From_Server_Error;
-//			errType = ErrorType_Custom;
-//			bResult = FALSE;
-//			CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Recv write image file error,filename=%s,Speed=%.2f,custom errorcode=0x%X,get data from server error")
-//				,strImageName,port->GetRealSpeed(),dwErrorCode);
-
-//			goto END;
-//		}
-//	}
-
-//END:
-//	WSACloseEvent(olSend.hEvent);
-//	WSACloseEvent(olRecv.hEvent);
-
-//	port->SetResult(bResult);
-//	port->SetEndTime(CTime::GetCurrentTime());
-
-//	if (bResult)
-//	{
-//		port->SetPortState(PortState_Pass);
-//	}
-//	else
-//	{
-//		port->SetPortState(PortState_Fail);
-//		port->SetErrorCode(errType,dwErrorCode);
-//	}
-
-    //	return bResult;
+    return FALSE;
 }
 
 BOOL MakeImageDisk::OnCopyImage()
@@ -1718,6 +1101,9 @@ BOOL MakeImageDisk::BriefAnalyze()
             effData.wBytesPerSector = (WORD)m_dwBytesPerSector;
             m_EffList.push_back(effData);
         }
+        break;
+    default:
+        ERROR("PartitionStyle is out of range!");
         break;
     }
 

@@ -18,90 +18,90 @@ void PortCommand::Init( QSerialPort *pSerialPort,int hFile )
 	m_hLogFile = hFile;
 }
 
-void PortCommand::RedLight( int nPort,BOOL bLight )
-{
-//	WORD wCommand = 0;
-//	if (bLight)
-//	{
-//		wCommand = RED_LIGHT_ON;
-//	}
-//	else
-//	{
-//		wCommand = RED_LIGHT_OFF;
-//	}
+//void PortCommand::RedLight( int nPort,BOOL bLight )
+//{
+////	WORD wCommand = 0;
+////	if (bLight)
+////	{
+////		wCommand = RED_LIGHT_ON;
+////	}
+////	else
+////	{
+////		wCommand = RED_LIGHT_OFF;
+////	}
 
-//	// 母盘位置暂时未定
-//	wCommand |= (nPort<<8);
+////	// 母盘位置暂时未定
+////	wCommand |= (nPort<<8);
 
-//    BYTE buffer[2] = {0};
-//	memcpy(buffer,&wCommand,2);
+////    BYTE buffer[2] = {0};
+////	memcpy(buffer,&wCommand,2);
 
-////	m_pSerialPort->WriteBytes(buffer,2);
-//    m_pSerialPort->write(buffer,2);
-////	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
-////	Sleep(SLEEP_TIME);
-}
+//////	m_pSerialPort->WriteBytes(buffer,2);
+////    m_pSerialPort->write(buffer,2);
+//////	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
+//////	Sleep(SLEEP_TIME);
+//}
 
-void PortCommand::GreenLight( int nPort,BOOL bLight)
-{
-//	WORD wCommand = 0;
-//	if (bLight)
-//	{
-//		wCommand = GREEN_LIGHT_ON;
-//	}
-//	else
-//	{
-//		wCommand = GREEN_LIGHT_OFF;
-//	}
+//void PortCommand::GreenLight( int nPort,BOOL bLight)
+//{
+////	WORD wCommand = 0;
+////	if (bLight)
+////	{
+////		wCommand = GREEN_LIGHT_ON;
+////	}
+////	else
+////	{
+////		wCommand = GREEN_LIGHT_OFF;
+////	}
 
-//	// 母盘位置暂时未定
-//	wCommand |= (nPort<<8);
+////	// 母盘位置暂时未定
+////	wCommand |= (nPort<<8);
 
-//    BYTE buffer[2] = {0};
-//	memcpy(buffer,&wCommand,2);
+////    BYTE buffer[2] = {0};
+////	memcpy(buffer,&wCommand,2);
 
-//    m_pSerialPort->write(buffer,2);
-////	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
-////	Sleep(SLEEP_TIME);
-}
+////    m_pSerialPort->write(buffer,2);
+//////	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
+//////	Sleep(SLEEP_TIME);
+//}
 
-void PortCommand::RedGreenLight( int nPort,BOOL bLight )
-{
-//	WORD wCommand = 0;
-//	if (bLight)
-//	{
-//		wCommand = GREEN_RED_LIGHT_ON;
-//	}
-//	else
-//	{
-//		wCommand = GREEN_RED_LIGHT_OFF;
-//	}
+//void PortCommand::RedGreenLight( int nPort,BOOL bLight )
+//{
+////	WORD wCommand = 0;
+////	if (bLight)
+////	{
+////		wCommand = GREEN_RED_LIGHT_ON;
+////	}
+////	else
+////	{
+////		wCommand = GREEN_RED_LIGHT_OFF;
+////	}
 
-//	// 母盘位置暂时未定
-//	wCommand |= (nPort<<8);
+////	// 母盘位置暂时未定
+////	wCommand |= (nPort<<8);
 
-//    BYTE buffer[2] = {0};
-//	memcpy(buffer,&wCommand,2);
+////    BYTE buffer[2] = {0};
+////	memcpy(buffer,&wCommand,2);
 
-//    m_pSerialPort->write(buffer,2);
-////	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
-////	Sleep(SLEEP_TIME);
-}
+////    m_pSerialPort->write(buffer,2);
+//////	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
+//////	Sleep(SLEEP_TIME);
+//}
 
-void PortCommand::GreenLightFlash( int nPort )
-{
-//	WORD wCommand = GREEN_LIGHT_FLASH;
+//void PortCommand::GreenLightFlash( int nPort )
+//{
+////	WORD wCommand = GREEN_LIGHT_FLASH;
 
-//	// 母盘位置暂时未定
-//	wCommand |= (nPort<<8);
+////	// 母盘位置暂时未定
+////	wCommand |= (nPort<<8);
 
-//    BYTE buffer[2]= {0};
-//	memcpy(buffer,&wCommand,2);
+////    BYTE buffer[2]= {0};
+////	memcpy(buffer,&wCommand,2);
 
-//    m_pSerialPort->write(buffer,2);
-////	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
-////	Sleep(SLEEP_TIME);
-}
+////    m_pSerialPort->write(buffer,2);
+//////	CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] TX = %02X %02X"),buffer[0],buffer[1]);
+//////	Sleep(SLEEP_TIME);
+//}
 
 void PortCommand::EnableFlashLight()
 {
@@ -221,6 +221,8 @@ void PortCommand::ResetLight()
 
 void PortCommand::Buzzer( BOOL bOn )
 {
+    USE_PARAM(bOn);
+
     WORD wCommand = 0;
     wCommand = BUZZER_ON_OFF;
 

@@ -117,14 +117,19 @@ ULONGLONG Disk::GetNumberOfSectors(HANDLE hDevice, PDWORD pdwBytesPerSector, MED
 
 BOOL Disk::SetDiskAtrribute(HANDLE hDisk, BOOL bReadOnly, BOOL bOffline, PDWORD pdwErrorCode)
 {
+    USE_PARAM(hDisk);
+    USE_PARAM(bReadOnly);
+    USE_PARAM(bOffline);
+    USE_PARAM(pdwErrorCode);
+
     return FALSE;
 }
 
 
-BOOL Disk::GetDiskModelNameAndSerialNumber(HANDLE hDevice, LPTSTR lpszModulName, LPTSTR lpszSerialNum, DWORD *pdwErrorCode)
-{
+//BOOL Disk::GetDiskModelNameAndSerialNumber(HANDLE hDevice, LPTSTR lpszModulName, LPTSTR lpszSerialNum, DWORD *pdwErrorCode)
+//{
 
-}
+//}
 
 void Disk::Init(HWND hWnd, LPBOOL lpCancel, HANDLE hLogFile, PortCommand *pCommand, UINT nBlockSectors)
 {
@@ -576,10 +581,12 @@ BOOL Disk::ReadSectors(HANDLE hDevice, ULONGLONG ullStartSector, DWORD dwSectors
     ULONGLONG ullOffset = ullStartSector * dwBytesPerSector;
     DWORD dwLen = dwSectors * dwBytesPerSector;
     DWORD dwReadLen = 0;
-    DWORD dwErrorCode = 0;
-
+//    DWORD dwErrorCode = 0;
+    dwTimeOut = dwTimeOut;
     if (!ReadFile(hDevice,lpSectBuff,dwLen,dwReadLen,ullOffset))
     {
+        if(pdwErrorCode != NULL)
+            *pdwErrorCode = errno;
         return FALSE;
     }
     else
@@ -615,11 +622,12 @@ BOOL Disk::WriteSectors(HANDLE hDevice, ULONGLONG ullStartSector, DWORD dwSector
     ULONGLONG ullOffset = ullStartSector * dwBytesPerSector;
     DWORD dwLen = dwSectors * dwBytesPerSector;
     DWORD dwWriteLen = 0;
-    DWORD dwErrorCode = 0;
-
+//    DWORD dwErrorCode = 0;
+    dwTimeOut = dwTimeOut;
     if (!WriteFile(hDevice,lpSectBuff,dwLen,dwWriteLen,ullOffset))
     {
-
+        if(pdwErrorCode != NULL)
+            *pdwErrorCode = errno;
         return FALSE;
     }
     else
@@ -652,24 +660,8 @@ BOOL Disk::WriteFile(HANDLE hDevice, LPBYTE lpSectBuff, DWORD dwLen, DWORD &dwWr
 
 BOOL Disk::ReadFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYTE lpBuffer, PDWORD pdwErrorCode, DWORD dwTimeOut)
 {
-//    int n;
-//    if((n = pread(hFile,lpBuffer,dwSize,ullOffset))>0)
-//    {
-//        dwSize = n;
-//        return TRUE;
-//    }
-//    else
-//    {
-//       if(n<0)
-//       {
-//            return FALSE;
-//       }
-//       else
-//       {
-//            dwSize = n;
-//            return TRUE;
-//       }
-//    }
+    USE_PARAM(dwTimeOut);
+
     DWORD dwReadSize = 0;
     if(!ReadFile(hFile,lpBuffer,dwSize,dwReadSize,ullOffset))
     {
@@ -680,6 +672,10 @@ BOOL Disk::ReadFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYTE
         if(dwReadSize != dwSize)
         {
             dwSize = dwReadSize;
+            if(pdwErrorCode != NULL)
+            {
+                *pdwErrorCode = errno;
+            }
             return FALSE;
         }
         else
@@ -692,24 +688,8 @@ BOOL Disk::ReadFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYTE
 
 BOOL Disk::WriteFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYTE lpBuffer, PDWORD pdwErrorCode, DWORD dwTimeOut)
 {
-//    long n;
-//    if((n = pwrite(hFile,lpBuffer,dwSize,ullOffset))>0)
-//    {
-//        dwSize = n;
-//        return TRUE;
-//    }
-//    else
-//    {
-//       if(n<0)
-//       {
-//            return FALSE;
-//       }
-//       else
-//       {
-//            dwSize = n;
-//            return TRUE;
-//       }
-//    }
+    USE_PARAM(dwTimeOut);
+
     DWORD dwWriteSize = 0;
     if(!WriteFile(hFile,lpBuffer,dwSize,dwWriteSize,ullOffset))
     {
@@ -720,6 +700,10 @@ BOOL Disk::WriteFileAsyn(HANDLE hFile, ULONGLONG ullOffset, DWORD &dwSize, LPBYT
         if(dwWriteSize != dwSize)
         {
             dwSize = dwWriteSize;
+            if(pdwErrorCode != NULL)
+            {
+                *pdwErrorCode = errno;
+            }
             return FALSE;
         }
         else
@@ -2174,7 +2158,7 @@ BOOL Disk::QuickClean(CPort *port, PDWORD pdwErrorCode)
         DWORD dwBytesPerSector = 0;
         ULONGLONG ullSectorNums = GetNumberOfSectors(hDisk,&dwBytesPerSector,NULL);
         DWORD dwSectors = CLEAN_LENGTH/dwBytesPerSector;
-        DWORD dwSize = 0;
+//        DWORD dwSize = 0;
 
         if (!WriteSectors(hDisk,0,dwSectors,dwBytesPerSector,pByte,pdwErrorCode))
         {
@@ -2220,6 +2204,8 @@ BOOL Disk::QuickClean(CPort *port, PDWORD pdwErrorCode)
 
 BOOL Disk::QuickClean(HANDLE hDisk, CPort *port, PDWORD pdwErrorCode)
 {
+    USE_PARAM(port);
+
     BOOL bResult = TRUE;
     BYTE *pByte = new BYTE[CLEAN_LENGTH];
     ZeroMemory(pByte,CLEAN_LENGTH);
@@ -2227,7 +2213,7 @@ BOOL Disk::QuickClean(HANDLE hDisk, CPort *port, PDWORD pdwErrorCode)
     DWORD dwBytesPerSector = 0;
     ULONGLONG ullSectorNums = GetNumberOfSectors(hDisk,&dwBytesPerSector,NULL);
     DWORD dwSectors = CLEAN_LENGTH/dwBytesPerSector;
-    DWORD dwSize = 0;
+//    DWORD dwSize = 0;
 
     if (!WriteSectors(hDisk,0,dwSectors,dwBytesPerSector,pByte,pdwErrorCode))
     {
@@ -2246,122 +2232,146 @@ BOOL Disk::QuickClean(HANDLE hDisk, CPort *port, PDWORD pdwErrorCode)
 
 void *Disk::ReadDiskThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::ReadImageThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::WriteDiskThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::WriteDiskWithDataThreadProc(LPVOID lpParam)
 {
-
+    USE_PARAM(lpParam);
+    return NULL;
 }
 
 void *Disk::WriteImageThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::VerifyThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::CompressThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::UnCompressThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void* Disk::CleanDiskThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::VerifySectorThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::ReadFilesThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::WriteFilesThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::VerifyFilesThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::VerifyFilesByteThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::FormatDiskThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::SearchUserLogThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::DeleteChangeThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::EnumFileThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::ComputeHashThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::FullRWTestThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::FadePickerThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::SpeedCheckThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::CompareCleanThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 void *Disk::CopyFilesAsyncThreadProc(LPVOID lpParm)
 {
-
+    USE_PARAM(lpParm);
+    return NULL;
 }
 
 BOOL Disk::OnCopyFilesAsync()
@@ -2372,7 +2382,7 @@ BOOL Disk::OnCopyFilesAsync()
 BOOL Disk::OnCopyDisk()
 {
     BOOL bResult = FALSE;
-    DWORD dwReadId,dwWriteId,dwVerifyId,dwErrorCode;
+    DWORD /*dwReadId,dwWriteId,dwVerifyId,*/dwErrorCode;
 
     m_bEnd = TRUE;
 
@@ -2419,7 +2429,8 @@ BOOL Disk::OnCopyDisk()
 //                if (range.ullStartLBA < m_ullSectorNums && range.ullEndingLBA <= m_ullCapacity)
                 if (range.ullStartLBA < m_ullSectorNums && range.ullEndingLBA <= m_ullSectorNums)
                 {
-                    EFF_DATA effData = {0};
+                    EFF_DATA effData ;
+                    ZeroMemory(&effData,sizeof(effData));
                     effData.ullStartSector = range.ullStartLBA;
                     effData.ullSectors = range.ullEndingLBA - range.ullStartLBA;
 //                    effData.wBytesPerSector = BYTES_PER_SECTOR;
@@ -2438,6 +2449,9 @@ BOOL Disk::OnCopyDisk()
 //            CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Analyze end, valid data size=%I64d"),m_ullValidSize);
 
         }
+        break;
+    default:
+        ERROR("WorkMode is invalid!");
         break;
     }
 
@@ -2460,7 +2474,7 @@ BOOL Disk::OnCopyDisk()
 
         m_CleanMode = CleanMode_Full;
 
-        char function[255] = {NULL};
+        char function[255] = {0};
 
         m_bEnd = FALSE;
 
@@ -3048,7 +3062,7 @@ BOOL Disk::OnCopyImage()
 
 
     BOOL bResult = FALSE;
-    DWORD dwReadId,dwWriteId,dwVerifyId,dwUncompressId;
+//    DWORD dwReadId,dwWriteId,dwVerifyId,dwUncompressId;
 
     m_bEnd = TRUE;
 
@@ -3058,7 +3072,7 @@ BOOL Disk::OnCopyImage()
         CUtils::WriteLogFile(m_hLogFile,TRUE,_T("Clean disk first......"));
 
         m_CleanMode = CleanMode_Full;
-        char function[255] = {NULL};
+        char function[255] = {0};
 
         m_bEnd = FALSE;
 
@@ -3489,7 +3503,8 @@ BOOL Disk::OnMakeImage()
 
             if (range.ullStartLBA < m_ullSectorNums && range.ullEndingLBA <= m_ullCapacity)
             {
-                EFF_DATA effData = {0};
+                EFF_DATA effData;
+                ZeroMemory(&effData,sizeof(effData));
                 effData.ullStartSector = range.ullStartLBA;
                 effData.ullSectors = range.ullEndingLBA - range.ullStartLBA;
                 effData.wBytesPerSector = BYTES_PER_SECTOR;
@@ -3538,7 +3553,7 @@ BOOL Disk::OnMakeImage()
 //    ClearDataQueueList();
     m_DataQueue.Clear();
     BOOL bResult = FALSE;
-    DWORD dwReadId,dwWriteId,dwCompressId,dwErrorCode;
+    DWORD /*dwReadId,dwWriteId,dwCompressId,*/dwErrorCode;
 
     pthread_t pthReadThread;
     pthread_create(&pthReadThread,NULL,ReadDiskThreadProc,this);
@@ -3669,7 +3684,7 @@ BOOL Disk::OnCompareDisk()
     }
 
     BOOL bResult = FALSE;
-    DWORD dwVerifyId,dwErrorCode;
+    DWORD dwErrorCode;
 
 //    HANDLE hMasterVerifyThread = NULL;
     pthread_t pthMasterVerifyThread;
@@ -3829,7 +3844,7 @@ BOOL Disk::OnCompareDisk()
 BOOL Disk::OnCleanDisk()
 {
     BOOL bResult = FALSE;
-    DWORD dwWriteId,dwErrorCode;
+    DWORD dwErrorCode;
 
     //子盘写线程
     if (m_CleanMode == CleanMode_Safe)
@@ -4140,7 +4155,7 @@ BOOL Disk::OnCopyFiles()
 BOOL Disk::OnFormatDisk()
 {
     BOOL bResult = FALSE;
-    DWORD dwWriteId,dwErrorCode;
+    DWORD dwErrorCode;
 
     //子盘写线程
     UINT nCurrentTargetCount = GetCurrentTargetCount();
@@ -4560,7 +4575,7 @@ BOOL Disk::WriteDisk(CPort *port, CDataQueue *pDataQueue)
 //    SetDiskAtrribute(hDisk,FALSE,TRUE,&dwErrorCode);
 
     // 计算精确速度
-    struct timeval freq,t0,t1,t2;
+    struct timeval t0,t1,t2;
     double dbTimeNoWait = 0.0,dbTimeWait = 0.0;
 
     DWORD dwBytesPerSector = port->GetBytesPerSector();
@@ -4774,11 +4789,16 @@ BOOL Disk::WriteImage(CPort *port, CDataQueue *pDataQueue)
 
 BOOL Disk::VerifyDisk(CPort *port, CHashMethod *pHashMethod)
 {
+    USE_PARAM(port);
+    USE_PARAM(pHashMethod);
+
     return FALSE;
 }
 
 BOOL Disk::VerifyDisk(CPort *port, CDataQueue *pDataQueue)
 {
+    USE_PARAM(port);
+    USE_PARAM(pDataQueue);
     return FALSE;
 }
 
@@ -5064,26 +5084,31 @@ BOOL Disk::Uncompress()
 
 BOOL Disk::CleanDisk(CPort *port)
 {
+    USE_PARAM(port);
     return FALSE;
 }
 
 BOOL Disk::FullRWTest(CPort *port)
 {
+    USE_PARAM(port);
     return FALSE;
 }
 
 BOOL Disk::FadePicker(CPort *port)
 {
+    USE_PARAM(port);
     return FALSE;
 }
 
 BOOL Disk::SpeedCheck(CPort *port)
 {
+    USE_PARAM(port);
     return FALSE;
 }
 
 BOOL Disk::CompareClean(CPort *port)
 {
+    USE_PARAM(port);
     return FALSE;
 }
 
@@ -5099,16 +5124,21 @@ BOOL Disk::ReadLocalFiles()
 
 BOOL Disk::WriteFiles(CPort *port, CDataQueue *pDataQueue)
 {
+    USE_PARAM(port);
+    USE_PARAM(pDataQueue);
     return FALSE;
 }
 
 BOOL Disk::VerifyFiles(CPort *port, CHashMethod *pHashMethod)
 {
+    USE_PARAM(port);
+    USE_PARAM(pHashMethod);
     return FALSE;
 }
 
 BOOL Disk::FormatDisk(CPort *port)
 {
+    USE_PARAM(port);
     return FALSE;
 }
 
@@ -5327,17 +5357,22 @@ BOOL Disk::WriteLocalImage(CPort *port, CDataQueue *pDataQueue)
 
 BOOL Disk::WriteRemoteImage(CPort *port, CDataQueue *pDataQueue)
 {
+    USE_PARAM(port);
+    USE_PARAM(pDataQueue);
     return FALSE;
 }
 
 BOOL Disk::SearchUserLog(CPort *port)
 {
+    USE_PARAM(port);
     return FALSE;
 }
 
 void Disk::SearchUserLog(CString strPath, CString strType, CStringArray *pArray)
 {
-
+    USE_PARAM(strPath);
+    USE_PARAM(strType);
+    USE_PARAM(pArray);
 }
 
 void Disk::CleanMapPortStringArray()
@@ -5367,21 +5402,31 @@ BOOL Disk::QueryChangeList()
 
 BOOL Disk::DeleteChange(CPort *port)
 {
+    USE_PARAM(port);
     return FALSE;
 }
 
 int Disk::EnumFile(CString strPath, CString strVolume, CMapStringToULL *pMap, CMapStringToString *pArray)
 {
+    USE_PARAM(strPath);
+    USE_PARAM(strVolume);
+    USE_PARAM(pMap);
+    USE_PARAM(pArray);
     return FALSE;
 }
 
 BOOL Disk::EnumFileSize(CPort *port, CMapStringToULL *pMap, CMapStringToString *pArray)
 {
+    USE_PARAM(port);
+    USE_PARAM(pMap);
+    USE_PARAM(pArray);
     return FALSE;
 }
 
 BOOL Disk::ComputeHashValue(CPort *port, CMapStringToString *pMap)
 {
+    USE_PARAM(port);
+    USE_PARAM(pMap);
     return FALSE;
 }
 
@@ -5397,5 +5442,9 @@ void Disk::CompareHashValue()
 
 CHAR *Disk::ConvertSENDCMDOUTPARAMSBufferToString(const DWORD *dwDiskData, DWORD nFirstIndex, DWORD nLastIndex)
 {
+    USE_PARAM(dwDiskData);
+    USE_PARAM(nFirstIndex);
+    USE_PARAM(nLastIndex);
+
     return 0;
 }

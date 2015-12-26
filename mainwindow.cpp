@@ -30,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     initial();
 
+    initialConfig();
+
 }
 
 MainWindow::~MainWindow()
@@ -383,7 +385,7 @@ BOOL MainWindow::initialConfig()
 
 
     // 初始化
-//    InitialPortPath();
+    InitialPortPath();
 
 //    InitialPortFrame();
 
@@ -508,30 +510,68 @@ void MainWindow::InitialPortPath()
 
 void MainWindow::InitialSerialPort()
 {
+    CString strSerialPortName = m_Config.GetString(_T("SerialPort"),_T("PortName"),"/dev/ttyUSB0") ;
 //    DWORD dwPortNum = m_Config.GetUInt(_T("SerialPort"),_T("PortNumber"),1);
-//    DWORD dwBaudRate = m_Config.GetUInt(_T("SerialPort"),_T("BaudRate"),9600);
-//    BYTE byDataBits = (BYTE)m_Config.GetUInt(_T("SerialPort"),_T("DataBits"),8);
-//    BYTE byStopBits = (BYTE)m_Config.GetUInt(_T("SerialPort"),_T("StopBits"),1);
+    DWORD dwBaudRate = m_Config.GetUInt(_T("SerialPort"),_T("BaudRate"),9600);
+    BYTE byDataBits = (BYTE)m_Config.GetUInt(_T("SerialPort"),_T("DataBits"),8);
+    double byStopBits = m_Config.GetDouble(_T("SerialPort"),_T("StopBits"),1);
 
-//    CString strSerialPort;
-//    strSerialPort.Format(_T("%ld,n,%d,%d"),dwBaudRate,byDataBits,byStopBits);
+    QSerialPort::StopBits stBt;
+    if(0.9 <= byStopBits &&byStopBits <1.3)
+    {
+        stBt = QSerialPort::OneStop;
+    }
+    else if(1.3<=byStopBits&&byStopBits<1.7)
+    {
+        stBt = QSerialPort::OneAndHalfStop;
+    }
+    else if(1.7 <= byStopBits &&byStopBits<2.1)
+    {
+        stBt = QSerialPort::TwoStop;
+    }
+    else
+    {
+        stBt = QSerialPort::UnknownStopBits;
+    }
 
-//    CString strLog;
-//    strLog.Format(_T("[SerialPort] COM%ld,%s"),dwPortNum,strSerialPort.c_str());
-//    CUtils::WriteLogFile(m_hLogFile,TRUE,strLog.c_str());
 
-////    m_SerialPort.SetWnd(m_hWnd);
+    m_SerialPort.setPortName(strSerialPortName.c_str());
+    m_SerialPort.setBaudRate(dwBaudRate);
+    m_SerialPort.setDataBits((QSerialPort::DataBits)byDataBits);
+    m_SerialPort.setParity(QSerialPort::NoParity);
+    m_SerialPort.setStopBits(stBt);
+    m_SerialPort.setFlowControl(QSerialPort::NoFlowControl);
 
-//    if (!m_SerialPort.Open(dwPortNum,strSerialPort.GetBuffer()))
-//    {
-//        DWORD dwErrorCode = m_SerialPort.GetErrorCode();
-//        CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] Open COM%ld failed,system errorcode=%ld,%s")
-//            ,dwPortNum,dwErrorCode,CUtils::GetErrorMsg(dwErrorCode));
+
+//    BOOL bSerialOpen = m_SerialPort.open(QIODevice::ReadWrite);
+//    if (!bSerialOpen) {
+//        DEBUG("Open SerialPort error!");
+//    } else {
+//        DEBUG("Open SerialPort successful!");
 //    }
-//    else
-//    {
-//        CUtils::WriteLogFile(m_hLogFile,TRUE,_T("[SerialPort] Open COM%ld success."),dwPortNum);
-//    }
+
+
+    CString strSerialPort;
+    strSerialPort.Format(_T("%ld,n,%d,%d"),dwBaudRate,byDataBits,byStopBits);
+
+    CString strLog;
+    strLog.Format(_T("[SerialPort] %s,%s"),strSerialPortName.c_str(),strSerialPort.c_str());
+    CUtils::WriteLogFile(m_hLogFile,TRUE,strLog.c_str());
+
+
+
+    if (!m_SerialPort.open(QIODevice::ReadWrite))
+    {
+        QString strSerialPortErr = m_SerialPort.errorString();
+        strLog.Format("[SerialPort] Open %s failed,system error=%s",strSerialPortName.c_str(),strSerialPortErr.toStdString().c_str());
+        CUtils::WriteLogFile(m_hLogFile,TRUE,strLog.c_str());
+        ERROR("Open serial port error!");
+    }
+    else
+    {
+        strLog.Format(_T("[SerialPort] Open %s success."),strSerialPortName.c_str());
+        CUtils::WriteLogFile(m_hLogFile,TRUE,strLog.c_str());
+    }
 }
 
 void MainWindow::BackupLogfile(HANDLE hFile, DWORD dwFileSize)
@@ -655,35 +695,42 @@ void MainWindow::BackupLogfile(HANDLE hFile, DWORD dwFileSize)
 
 void *MainWindow::StartThreadProc(LPVOID lpParm)
 {
-
+    lpParm = lpParm;
+    return NULL;
 }
 
 void *MainWindow::StopThreadProc(LPVOID lpParm)
 {
-
+    lpParm = lpParm;
+    return NULL;
 }
 
 void *MainWindow::InitialMachineThreadProc(LPVOID lpParm)
 {
-
+    lpParm = lpParm;
+    return NULL;
 }
 
 void *MainWindow::EnumDeviceThreadProc(LPVOID lpParm)
 {
-
+    lpParm = lpParm;
+    return NULL;
 }
 
 void *MainWindow::BurnInTestThreadProc(LPVOID lpParm)
 {
-
+    lpParm = lpParm;
+    return NULL;
 }
 
 void *MainWindow::ConnectSocketThreadProc(LPVOID lpParm)
 {
-
+    lpParm = lpParm;
+    return NULL;
 }
 
 void *MainWindow::StartAsyncThreadProc(LPVOID lpParm)
 {
-
+    lpParm = lpParm;
+    return NULL;
 }

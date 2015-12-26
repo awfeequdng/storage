@@ -42,14 +42,6 @@ public:
     CUtils();
 //    template<class ...>
     static void WriteLogFile(int logFile,int timeStamp,std::string text);
-    template<class ...Args>
-    static void WriteLogFile(std::tuple<Args...> &t )
-    {
-        if((sizeof...(Args)) == 3)
-        {
-            std::cout<<"three arguement!"<<std::endl;
-        }
-    }
 
     static std::string GetAppVersion(std::string path);
 

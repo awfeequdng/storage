@@ -101,6 +101,8 @@ inline void Sleep(int ms){usleep(ms*1000);}
 inline void DeleteFile(CString strLogFile){ unlink(strLogFile.c_str());}
 inline BOOL PathFileExists(CString strRecentConfig){return access(strRecentConfig.c_str(),F_OK);}
 
+#define USE_PARAM(param) ((param) = (param))
+
 #ifndef ZeroMemory
 #define ZeroMemory(pByte,size) memset(pByte,0,size)
 #endif

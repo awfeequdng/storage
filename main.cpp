@@ -28,7 +28,8 @@ GcfgRunBatchCmd     *g_pGcfgRunBatchCmd;
 void initData(void);
 void releaseData(void);
 
-
+#include <unistd.h>
+#include <fcntl.h>
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -42,6 +43,10 @@ int main(int argc, char *argv[])
     config.WriteDouble("test","cai",2.3);
     std::cout<<CUtils::GetAppPath()<<std::endl;
     std::cout<<CUtils::GetFilePathWithoutName(CUtils::GetAppPath())<<std::endl;
+
+//    int hLogFile = open("/home/caipengxiang/logfile.c",O_RDWR);
+
+//    CUtils::WriteLogFile(1,1,string("NIHAO"),std::make_tuple(3,string("df")));
     int ret = a.exec();
 
     releaseData();
