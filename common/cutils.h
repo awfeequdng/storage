@@ -45,6 +45,7 @@ public:
 
     static std::string GetAppVersion(std::string path);
 
+
     static void WriteLogFile(int logFile,int timeStamp,CString text)
     {
         WriteLogFile(logFile,timeStamp,text.stdStr());
@@ -59,6 +60,8 @@ public:
     }
     static std::string GetAppPath();
     static std::string GetFilePathWithoutName(CString str);
+    static std::string AdjustFileSize(unsigned long long ullFileSize);
+    static std::string AdjustSpeed(unsigned long long ullSpeed);
 };
 
 #endif // CUTILS_H

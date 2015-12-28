@@ -2,7 +2,7 @@
 NumOfMasterDrives=1
 M1-1=\\.\{70439bd2-55c7-11e5-aec9-806e6f6e6963}:3
 [TargetDrives]
-NumOfTargetDrives=5
+NumOfTargetDrives=1
 T1-1=\\.\{70439bd2-55c7-11e5-aec9-806e6f6e6963}:4\
 [Option]
 MachineAlias=PHIYO

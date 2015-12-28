@@ -96,10 +96,17 @@ typedef unsigned long long uint64_t;
 
 #include <stdio.h>
 #include <sys/unistd.h>
-inline DWORD GetLastError(){return 0;}
+#include <fcntl.h>
+#include <error.h>
+inline DWORD GetLastError(){return errno;}
 inline void Sleep(int ms){usleep(ms*1000);}
 inline void DeleteFile(CString strLogFile){ unlink(strLogFile.c_str());}
-inline BOOL PathFileExists(CString strRecentConfig){return access(strRecentConfig.c_str(),F_OK);}
+
+inline BOOL PathFileExists(CString strRecentConfig){
+    if(0 == access(strRecentConfig.c_str(),F_OK))
+        return TRUE;
+    else
+        return FALSE;}
 
 #define USE_PARAM(param) ((param) = (param))
 

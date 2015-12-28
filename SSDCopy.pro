@@ -6,6 +6,7 @@
 
 QT       += core gui
 
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets serialport
 
 TARGET = SSDCopy
@@ -62,7 +63,9 @@ SOURCES += main.cpp\
     UI/viewimagedlg.cpp \
     Disk/makeimagedisk.cpp \
     Thread/mythread.cpp \
-    common/PrintMacros.cpp
+    common/PrintMacros.cpp \
+    UI/portdlg.cpp \
+    common/clisence.cpp
 
 HEADERS  += mainwindow.h \
     SerialPortCommand/PortCommand.h \
@@ -111,7 +114,9 @@ HEADERS  += mainwindow.h \
     Disk/makeimagedisk.h \
     Thread/mythread.h \
     Disk/disk.h \
-    common/PrintMacros.h
+    common/PrintMacros.h \
+    UI/portdlg.h \
+    common/clisence.h
 
 FORMS    += mainwindow.ui \
     UI/capconvertdupitemdlg.ui \
@@ -147,7 +152,8 @@ FORMS    += mainwindow.ui \
     UI/varisizedupitemdlg.ui \
     UI/VariSizeDupItemDlg1.ui \
     UI/viewimagedlg.ui \
-    UI/ViewImageDlg1.ui
+    UI/ViewImageDlg1.ui \
+    UI/portdlg.ui
 
 RESOURCES += \
     resource.qrc

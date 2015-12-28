@@ -26,6 +26,7 @@
 #include "UI/userdefineitemdlg.h"
 #include "UI/varisizedupitemdlg.h"
 #include "UI/viewimagedlg.h"
+#include "UI/portdlg.h"
 
 
 #include "common/cini.h"
@@ -82,9 +83,14 @@ private:
     static void *makeImageThread();
     static void *copyImageThread();
 
+private slots:
+    void slotOnTimerUpdateStatistic();
+
 private:
     Ui::MainWindow *ui;
+    QTimer      m_timerUpdateStatistic;
 
+    PortDlg     * m_pPortFrames;
 
     CString       m_strAppPath;
     HANDLE        m_hLogFile;

@@ -19,9 +19,9 @@
         <file>image/manager.bmp</file>
         <file>image/menu.bmp</file>
         <file>image/more.bmp</file>
-        <file>image/NGFF_gray.bmp</file>
+        <file>image/NGFF_GRAY.bmp</file>
         <file>image/NGFF_GREEN.bmp</file>
-        <file>image/NGFF_normal.bmp</file>
+        <file>image/NGFF_NORMAL.bmp</file>
         <file>image/NGFF_RED.bmp</file>
         <file>image/NGFF_YELLOW.bmp</file>
         <file>image/package.bmp</file>
